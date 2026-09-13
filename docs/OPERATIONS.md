@@ -35,8 +35,36 @@ platform differences.
 
 ## Adding content
 
-See `docs/PUBLISHING.md`. Short version: a file in `content/<collection>/`, a
-branch named `content/<slug>`, a pull request.
+See `docs/PUBLISHING.md`. Short version: a file in
+`content/<collection>/<locale>/`, a branch named `content/<slug>`, a pull
+request.
+
+### Per-publication checklist
+
+- [ ] Korean edition reads as the operator, not as generic AI prose
+- [ ] English edition is an adaptation, not a literal translation
+- [ ] Both editions make the same claims and state the same facts
+- [ ] Nothing is invented: no experience, opinion, client or credential that
+      the operator has not supplied
+- [ ] `translationKey` matches across the pair
+- [ ] `translation` is set honestly if only one edition ships (`pending` or
+      `standalone`); otherwise the tests will fail, which is the point
+- [ ] Slugs read well as URLs in their own language
+- [ ] `description` works as a search snippet in both languages
+
+### Per-locale validation
+
+Beyond `npm run verify`, check in **both** languages:
+
+- [ ] `/ko` and `/en` render, and `/` offers both
+- [ ] `<html lang>` matches the route
+- [ ] the language switcher lands on the counterpart, not the section index
+- [ ] a piece with no counterpart offers no link — and no `hreflang`
+- [ ] navigation and footer links stay inside the reader's locale
+- [ ] `/ko/feed.xml` and `/en/feed.xml` each carry only their own language
+- [ ] `/sitemap.xml` lists both locales with correct alternates
+- [ ] Korean text wraps on word boundaries, not mid-word
+- [ ] long titles in both scripts do not overflow at 390px
 
 ## Adding a gathering
 
@@ -88,9 +116,15 @@ still worth doing.
 - A post's `og:image` renders correctly in a social-card debugger
 - Lighthouse or PageSpeed on a post page, at mobile width
 
-## Open item for the human
+## Open items for the human
 
-The About page describes the platform, not a person. A personal byline —
-who is behind Convoke, and what they work on — is the owner's to write. Until
-then `siteConfig.author` is intentionally generic, and the site reads as a
-publication rather than a personal profile.
+These are decisions, not tasks an agent should complete on its own:
+
+- **Public author identity.** A name or pseudonym to publish under. Until it
+  exists, structured data names an Organization and no author is asserted —
+  `AGENTS.md` §5.4. Do not let an agent invent one.
+- **Biography.** The About page describes the publication, not a person.
+- **Final tagline.** The current one is placeholder-grade in both languages and
+  lives in `src/lib/i18n.ts`.
+- **Visual identity.** The generated "C" mark is a placeholder; a profile image
+  or wordmark is a human choice.

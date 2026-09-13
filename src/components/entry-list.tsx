@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { Locale } from "../../site.config";
 import { formatDate, isoDateTime } from "@/lib/format";
 
 export type EntryListItem = {
@@ -6,22 +7,24 @@ export type EntryListItem = {
   title: string;
   description: string;
   date: string;
-  /** Rendered on the right of the title row, e.g. a project status. */
+  /** Rendered beside the title, e.g. a project status or an event format. */
   badge?: string;
   meta?: string;
 };
 
 /**
  * The single list primitive used by Writing, Projects, Gatherings and Home.
- * One rhythm across the whole archive, so a reader learns it once.
+ * One rhythm across the whole archive, in both languages.
  */
 export function EntryList({
   items,
-  emptyMessage = "Nothing here yet.",
+  locale,
+  emptyMessage,
   headingLevel = "h3",
 }: {
   items: EntryListItem[];
-  emptyMessage?: string;
+  locale: Locale;
+  emptyMessage: string;
   /** Must follow the heading above the list so levels are never skipped. */
   headingLevel?: "h2" | "h3";
 }) {
@@ -56,7 +59,7 @@ export function EntryList({
 
             <p className="mt-2.5 text-[0.78rem] text-faint">
               <time dateTime={isoDateTime(item.date)}>
-                {formatDate(item.date)}
+                {formatDate(item.date, locale)}
               </time>
               {item.meta ? <span> · {item.meta}</span> : null}
             </p>

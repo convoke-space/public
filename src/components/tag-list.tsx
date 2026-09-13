@@ -1,8 +1,8 @@
-export function TagList({ tags }: { tags?: string[] }) {
+export function TagList({ tags, label }: { tags?: string[]; label: string }) {
   if (!tags || tags.length === 0) return null;
 
   return (
-    <ul className="flex flex-wrap gap-x-2 gap-y-1.5" aria-label="Topics">
+    <ul className="flex flex-wrap gap-x-2 gap-y-1.5" aria-label={label}>
       {tags.map((tag) => (
         <li
           key={tag}

@@ -1,108 +1,201 @@
 import fs from "node:fs";
 import path from "node:path";
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
+import { LOCALES } from "../site.config";
 import {
+  clearContentCache,
   COLLECTIONS,
   CONTENT_ROOT,
+  findPairingProblems,
+  getCounterpart,
+  getEntry,
+  getEntryByTranslationKey,
   getEvents,
   getPosts,
   getProjects,
   isUpcoming,
+  publishedLocales,
   readCollection,
   readingTimeMinutes,
   splitEvents,
+  UnsupportedLocaleError,
   type EventEntry,
 } from "@/lib/content";
 import { SLUG_PATTERN } from "@/lib/schema";
 
-/**
- * These run against the real content directory. A content file that would break
- * the production build fails here first, in a second rather than a minute.
- */
-describe("content directory", () => {
-  it("has a directory for every collection", () => {
+const FIXTURES = path.join(__dirname, "fixtures", "content");
+
+beforeEach(() => {
+  clearContentCache();
+});
+
+describe("locale handling", () => {
+  it("rejects an unsupported locale rather than guessing", () => {
+    // @ts-expect-error deliberately passing an unsupported value
+    expect(() => readCollection("posts", "fr")).toThrow(UnsupportedLocaleError);
+    // @ts-expect-error deliberately passing an unsupported value
+    expect(() => readCollection("posts", "ko-KR")).toThrow(/Supported locales/);
+  });
+
+  it("loads only the requested locale's files", () => {
+    const ko = readCollection("posts", "ko", FIXTURES);
+    const en = readCollection("posts", "en", FIXTURES);
+
+    expect(ko.every((e) => e.locale === "ko")).toBe(true);
+    expect(en.every((e) => e.locale === "en")).toBe(true);
+    expect(ko.map((e) => e.slug)).toContain("깃허브를-공용기억으로");
+    expect(en.map((e) => e.slug)).toContain("shared-memory");
+    expect(en.map((e) => e.slug)).not.toContain("깃허브를-공용기억으로");
+  });
+
+  it("accepts Hangul slugs and keeps them addressable", () => {
+    const entry = getEntry("posts", "ko", "깃허브를-공용기억으로", FIXTURES);
+    expect(entry?.frontmatter.title).toBe("깃허브를 공용 기억으로");
+  });
+});
+
+describe("content validation", () => {
+  it("rejects a duplicate translationKey inside one locale", () => {
+    const root = path.join(__dirname, "fixtures", "duplicate-key");
+    expect(() => readCollection("posts", "ko", root)).toThrow(
+      /duplicate translationKey "collision"/,
+    );
+  });
+
+  it("rejects a filename that is not a usable slug", () => {
+    const root = path.join(__dirname, "fixtures", "bad-slug");
+    expect(() => readCollection("posts", "ko", root)).toThrow(
+      /filename must be lowercase kebab-case/,
+    );
+  });
+
+  it("excludes drafts from every published listing", () => {
+    const slugs = getPosts("ko", FIXTURES).map((e) => e.slug);
+    expect(slugs).not.toContain("초안");
+    expect(readCollection("posts", "ko", FIXTURES).map((e) => e.slug)).toContain(
+      "초안",
+    );
+  });
+});
+
+describe("translation pairing", () => {
+  it("finds the counterpart across differing slugs", () => {
+    const ko = getEntry("posts", "ko", "깃허브를-공용기억으로", FIXTURES)!;
+    const en = getCounterpart(ko, "en", FIXTURES);
+    expect(en?.slug).toBe("shared-memory");
+    expect(en?.translationKey).toBe(ko.translationKey);
+  });
+
+  it("returns the entry itself for its own locale", () => {
+    const ko = getEntry("posts", "ko", "깃허브를-공용기억으로", FIXTURES)!;
+    expect(getCounterpart(ko, "ko", FIXTURES)).toBe(ko);
+    expect(publishedLocales(ko, FIXTURES)).toEqual(["ko", "en"]);
+  });
+
+  it("returns nothing when the other edition does not exist", () => {
+    const ko = getEntry("posts", "ko", "번역-대기중", FIXTURES)!;
+    expect(getCounterpart(ko, "en", FIXTURES)).toBeUndefined();
+    expect(publishedLocales(ko, FIXTURES)).toEqual(["ko"]);
+  });
+
+  it("looks an entry up by translationKey", () => {
+    const en = getEntryByTranslationKey("posts", "en", "shared-memory", FIXTURES);
+    expect(en?.slug).toBe("shared-memory");
+    expect(
+      getEntryByTranslationKey("posts", "en", "korean-only", FIXTURES),
+    ).toBeUndefined();
+  });
+
+  it("never pairs a draft, in either direction", () => {
+    const drafted = readCollection("posts", "ko", FIXTURES).find(
+      (e) => e.slug === "초안",
+    )!;
+    // A draft has no published edition anywhere — not even in its own language,
+    // so it can never acquire an hreflang or a language-switch target.
+    expect(getCounterpart(drafted, "ko", FIXTURES)).toBeUndefined();
+    expect(getCounterpart(drafted, "en", FIXTURES)).toBeUndefined();
+    expect(publishedLocales(drafted, FIXTURES)).toEqual([]);
+  });
+
+  it("separates a deliberate single-language edition from a missing one", () => {
+    const problems = findPairingProblems(FIXTURES);
+    const sources = problems.map((p) => p.source);
+
+    // `pending` and `standalone` opt out; the default `paired` does not.
+    expect(sources).not.toContain("content/posts/ko/번역-대기중.mdx");
+    expect(sources).not.toContain("content/posts/ko/단일-언어.mdx");
+    expect(sources).toContain("content/posts/en/missing-pair.mdx");
+    expect(problems.find((p) => p.translationKey === "missing-pair")?.missingLocale).toBe(
+      "ko",
+    );
+  });
+});
+
+describe("the published archive", () => {
+  it("has a directory for every collection in every locale", () => {
     for (const collection of COLLECTIONS) {
-      expect(
-        fs.existsSync(path.join(CONTENT_ROOT, collection)),
-        `content/${collection} is missing`,
-      ).toBe(true);
+      for (const locale of LOCALES) {
+        expect(
+          fs.existsSync(path.join(CONTENT_ROOT, collection, locale)),
+          `content/${collection}/${locale} is missing`,
+        ).toBe(true);
+      }
     }
   });
 
-  it("parses and validates every file", () => {
+  it("parses and validates every published file", () => {
     for (const collection of COLLECTIONS) {
-      expect(() => readCollection(collection)).not.toThrow();
+      for (const locale of LOCALES) {
+        expect(() => readCollection(collection, locale)).not.toThrow();
+      }
     }
   });
 
-  it("uses URL-safe, unique slugs", () => {
+  it("uses URL-safe, unique slugs per locale", () => {
     for (const collection of COLLECTIONS) {
-      const slugs = readCollection(collection).map((e) => e.slug);
-      for (const slug of slugs) expect(slug).toMatch(SLUG_PATTERN);
-      expect(new Set(slugs).size).toBe(slugs.length);
+      for (const locale of LOCALES) {
+        const slugs = readCollection(collection, locale).map((e) => e.slug);
+        for (const slug of slugs) expect(slug).toMatch(SLUG_PATTERN);
+        expect(new Set(slugs).size).toBe(slugs.length);
+      }
     }
   });
 
-  it("orders posts newest first", () => {
-    const dates = getPosts().map((p) => new Date(p.frontmatter.date).getTime());
-    expect(dates).toEqual([...dates].sort((a, b) => b - a));
+  it("has no accidentally missing translation", () => {
+    // An intentional single-language edition sets `translation: pending` or
+    // `standalone`. Anything else here is an oversight — see docs/PUBLISHING.md.
+    expect(
+      findPairingProblems().map(
+        (p) => `${p.source} has no ${p.missingLocale} edition`,
+      ),
+    ).toEqual([]);
+  });
+
+  it("orders posts newest first in every locale", () => {
+    for (const locale of LOCALES) {
+      const dates = getPosts(locale).map((p) =>
+        new Date(p.frontmatter.date).getTime(),
+      );
+      expect(dates).toEqual([...dates].sort((a, b) => b - a));
+    }
   });
 
   it("orders projects by liveness, then recency", () => {
     const rank = { active: 0, maintained: 1, exploring: 2, archived: 3 };
-    const ranks = getProjects().map((p) => rank[p.frontmatter.status]);
-    expect(ranks).toEqual([...ranks].sort((a, b) => a - b));
-  });
-
-  it("excludes drafts from published listings", () => {
-    for (const collection of COLLECTIONS) {
-      const all = readCollection(collection);
-      const drafted = all.filter((e) => e.frontmatter.draft);
-      const publishedSlugs = new Set(
-        [...getPosts(), ...getProjects(), ...getEvents()].map((e) => e.slug),
-      );
-      for (const entry of drafted) {
-        expect(publishedSlugs.has(entry.slug)).toBe(false);
-      }
+    for (const locale of LOCALES) {
+      const ranks = getProjects(locale).map((p) => rank[p.frontmatter.status]);
+      expect(ranks).toEqual([...ranks].sort((a, b) => a - b));
     }
-  });
-});
-
-describe("internal links in content resolve", () => {
-  const routes = new Set<string>([
-    "/",
-    "/about",
-    "/writing",
-    "/projects",
-    "/gatherings",
-    "/feed.xml",
-    "/sitemap.xml",
-    "/robots.txt",
-  ]);
-  for (const post of getPosts()) routes.add(`/writing/${post.slug}`);
-  for (const project of getProjects()) routes.add(`/projects/${project.slug}`);
-  for (const event of getEvents()) routes.add(`/gatherings/${event.slug}`);
-
-  const entries = COLLECTIONS.flatMap((c) => readCollection(c));
-
-  it("finds no broken site-relative links", () => {
-    const broken: string[] = [];
-    for (const entry of entries) {
-      const matches = entry.body.matchAll(/\]\((\/[^)\s]*)\)/g);
-      for (const match of matches) {
-        const href = (match[1] ?? "").split("#")[0]!.replace(/\/$/, "") || "/";
-        if (!routes.has(href)) broken.push(`${entry.source} -> ${match[1]}`);
-      }
-    }
-    expect(broken).toEqual([]);
   });
 });
 
 describe("events", () => {
   const makeEvent = (date: string, end?: string): EventEntry => ({
     collection: "events",
+    locale: "en",
     slug: "x",
-    source: "content/events/x.mdx",
+    translationKey: "x",
+    source: "content/events/en/x.mdx",
     body: "body",
     frontmatter: {
       title: "T",
@@ -111,6 +204,7 @@ describe("events", () => {
       end,
       location: "Online",
       format: "online",
+      translationKey: "x",
     },
   });
 
@@ -122,21 +216,37 @@ describe("events", () => {
 
   it("uses the end time when one is given", () => {
     const now = new Date("2026-05-01T20:00:00Z");
-    expect(isUpcoming(makeEvent("2026-05-01T18:00:00Z", "2026-05-01T19:00:00Z"), now)).toBe(false);
-    expect(isUpcoming(makeEvent("2026-05-01T18:00:00Z", "2026-05-01T21:00:00Z"), now)).toBe(true);
+    expect(
+      isUpcoming(makeEvent("2026-05-01T18:00:00Z", "2026-05-01T19:00:00Z"), now),
+    ).toBe(false);
+    expect(
+      isUpcoming(makeEvent("2026-05-01T18:00:00Z", "2026-05-01T21:00:00Z"), now),
+    ).toBe(true);
   });
 
-  it("splits into upcoming (soonest first) and past", () => {
-    const { upcoming, past } = splitEvents();
+  it("splits into upcoming (soonest first) and past, per locale", () => {
+    const now = new Date("2026-01-01T00:00:00Z");
+    const { upcoming, past } = splitEvents("ko", now, FIXTURES);
     const starts = upcoming.map((e) => new Date(e.frontmatter.date).getTime());
     expect(starts).toEqual([...starts].sort((a, b) => a - b));
-    expect(upcoming.length + past.length).toBe(getEvents().length);
+    expect(upcoming.length + past.length).toBe(getEvents("ko", FIXTURES).length);
+    expect(upcoming).toHaveLength(1);
   });
 });
 
-describe("helpers", () => {
-  it("never reports a reading time below one minute", () => {
+describe("readingTimeMinutes", () => {
+  it("never reports less than a minute", () => {
     expect(readingTimeMinutes("")).toBe(1);
+    expect(readingTimeMinutes("   ")).toBe(1);
+  });
+
+  it("counts Latin words", () => {
     expect(readingTimeMinutes("word ".repeat(440))).toBe(2);
+  });
+
+  it("counts Hangul syllables rather than space-delimited words", () => {
+    // Korean prose has few spaces, so a word count would read as ~1 minute.
+    const korean = "한국어문장입니다".repeat(125); // 1,000 syllables
+    expect(readingTimeMinutes(korean)).toBe(2);
   });
 });

@@ -4,8 +4,11 @@ export const OG_SIZE = { width: 1200, height: 630 } as const;
 export const OG_CONTENT_TYPE = "image/png";
 
 /**
- * One social card layout for every entry type. Kept text-only and typographic
- * on purpose: no fonts to fetch, no images to keep in sync with content.
+ * One social card layout for every entry type, in both languages.
+ *
+ * Text-only and typographic on purpose: no fonts to fetch, no images to keep in
+ * sync with content. `next/og`'s bundled face covers Latin; Hangul falls back
+ * to the renderer's default, so Korean titles are sized more conservatively.
  */
 export function entryCard({
   eyebrow,
@@ -16,6 +19,15 @@ export function entryCard({
   title: string;
   meta?: string;
 }) {
+  const hasHangul = /[가-힣]/.test(title);
+  const fontSize = hasHangul
+    ? title.length > 32
+      ? 52
+      : 62
+    : title.length > 60
+      ? 58
+      : 70;
+
   return new ImageResponse(
     (
       <div
@@ -42,14 +54,7 @@ export function entryCard({
           {eyebrow}
         </div>
 
-        <div
-          style={{
-            display: "flex",
-            fontSize: title.length > 60 ? 58 : 70,
-            lineHeight: 1.14,
-            maxWidth: 980,
-          }}
-        >
+        <div style={{ display: "flex", fontSize, lineHeight: 1.18, maxWidth: 980 }}>
           {title}
         </div>
 

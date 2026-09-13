@@ -3,10 +3,14 @@
  *
  * Deliberately dependency-free: the rules are small, the error messages need to
  * be precise enough for a human or an AI agent to fix a content file without
- * reading this module, and the whole thing is covered by tests/content.test.ts.
+ * reading this module, and the whole thing is covered by tests/schema.test.ts.
+ *
+ * Locale is NOT a frontmatter field. The directory a file lives in is the
+ * authoritative source of its locale — see docs/ARCHITECTURE.md. Storing it
+ * twice only creates drift.
  *
  * Adding a field? Add it here, document it in docs/PUBLISHING.md, and extend
- * the tests. Do not read raw frontmatter anywhere outside this module.
+ * the tests.
  */
 
 export const COLLECTIONS = ["posts", "projects", "events"] as const;
@@ -23,6 +27,17 @@ export type ProjectStatus = (typeof PROJECT_STATUSES)[number];
 export const EVENT_FORMATS = ["in-person", "online", "hybrid"] as const;
 export type EventFormat = (typeof EVENT_FORMATS)[number];
 
+/**
+ * Whether this entry is expected to have an edition in the other language.
+ *
+ * `paired` (the default) is checked by tests/content.test.ts, so an accidental
+ * missing translation fails validation instead of shipping a half-bilingual
+ * archive. The other two values are the explicit way to say "this one is
+ * single-language on purpose" or "the other edition is still being adapted".
+ */
+export const TRANSLATION_STATES = ["paired", "pending", "standalone"] as const;
+export type TranslationState = (typeof TRANSLATION_STATES)[number];
+
 type BaseFrontmatter = {
   title: string;
   description: string;
@@ -31,6 +46,12 @@ type BaseFrontmatter = {
   updated?: string;
   tags?: string[];
   draft?: boolean;
+  /**
+   * Locale-independent identity shared by both language editions of one piece.
+   * The language switcher and hreflang pairing are built on this.
+   */
+  translationKey: string;
+  translation?: TranslationState;
 };
 
 export type PostFrontmatter = BaseFrontmatter & {
@@ -40,7 +61,7 @@ export type PostFrontmatter = BaseFrontmatter & {
 
 export type ProjectFrontmatter = BaseFrontmatter & {
   status: ProjectStatus;
-  /** Where the project itself lives, if it is publicly reachable. */
+  /** Where the project itself lives, if it is publicly reachable today. */
   url?: string;
   repo?: string;
 };
@@ -177,11 +198,56 @@ class Collector {
     return value as T;
   }
 
+  optionalEnum<T extends string>(
+    key: string,
+    allowed: readonly T[],
+  ): T | undefined {
+    const value = this.data[key];
+    if (value === undefined || value === null) return undefined;
+    if (typeof value !== "string" || !allowed.includes(value as T)) {
+      this.problems.push(
+        `"${key}" must be one of: ${allowed.join(", ")} when present`,
+      );
+      return undefined;
+    }
+    return value as T;
+  }
+
+  translationKey(key: string): string {
+    const value = this.requiredString(key);
+    if (value && !TRANSLATION_KEY_PATTERN.test(value)) {
+      this.problems.push(
+        `"${key}" must be lowercase ASCII kebab-case so it stays language-independent (got "${value}")`,
+      );
+    }
+    return value;
+  }
+
+  /** Dates must be ordered, or the page shows something nonsensical. */
+  ordered(
+    earlierKey: string,
+    earlier: string | undefined,
+    laterKey: string,
+    later: string | undefined,
+  ) {
+    if (!earlier || !later) return;
+    if (new Date(later).getTime() < new Date(earlier).getTime()) {
+      this.problems.push(
+        `"${laterKey}" (${later}) must not be earlier than "${earlierKey}" (${earlier})`,
+      );
+    }
+  }
+
   rejectUnknown(known: readonly string[]) {
     const unknown = Object.keys(this.data).filter((k) => !known.includes(k));
     if (unknown.length > 0) {
       this.problems.push(
         `unknown field(s): ${unknown.join(", ")}. Add them to src/lib/schema.ts first`,
+      );
+    }
+    if (Object.prototype.hasOwnProperty.call(this.data, "locale")) {
+      this.problems.push(
+        `"locale" is not a frontmatter field — the directory the file lives in determines its locale`,
       );
     }
   }
@@ -194,16 +260,24 @@ const BASE_FIELDS = [
   "updated",
   "tags",
   "draft",
+  "translationKey",
+  "translation",
 ] as const;
 
 function parseBase(c: Collector): BaseFrontmatter {
+  const date = c.requiredDate("date");
+  const updated = c.optionalDate("updated");
+  c.ordered("date", date, "updated", updated);
+
   return {
     title: c.requiredString("title", { maxLength: 120 }),
     description: c.requiredString("description", { maxLength: 200 }),
-    date: c.requiredDate("date"),
-    updated: c.optionalDate("updated"),
+    date,
+    updated,
     tags: c.optionalTags("tags"),
     draft: c.optionalBoolean("draft"),
+    translationKey: c.translationKey("translationKey"),
+    translation: c.optionalEnum("translation", TRANSLATION_STATES),
   };
 }
 
@@ -238,9 +312,12 @@ export function parseFrontmatter<C extends Collection>(
         "format",
         "registrationUrl",
       ]);
+      const base = parseBase(c);
+      const end = c.optionalDate("end");
+      c.ordered("date", base.date, "end", end);
       result = {
-        ...parseBase(c),
-        end: c.optionalDate("end"),
+        ...base,
+        end,
         location: c.requiredString("location", { maxLength: 120 }),
         format: c.enum("format", EVENT_FORMATS),
         registrationUrl: c.optionalUrl("registrationUrl"),
@@ -278,5 +355,12 @@ function stripUndefined<T extends object>(value: T): T {
   ) as T;
 }
 
-/** Filenames become slugs, so keep them predictable and URL-safe. */
-export const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+/**
+ * Filenames become slugs. Korean slugs are first-class, so Hangul syllables are
+ * allowed alongside lowercase ASCII — but not spaces, uppercase or punctuation,
+ * which would make URLs unstable.
+ */
+export const SLUG_PATTERN = /^[a-z0-9가-힣]+(?:-[a-z0-9가-힣]+)*$/u;
+
+/** translationKey is an identifier, not a URL, so it stays ASCII. */
+export const TRANSLATION_KEY_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;

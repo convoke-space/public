@@ -79,4 +79,18 @@ describe("site config", () => {
   it("has no trailing slash on the canonical origin", () => {
     expect(siteConfig.canonicalOrigin).toMatch(/^https:\/\/[^/]+$/);
   });
+
+  it("declares a locale tag and an Open Graph code for every locale", () => {
+    for (const locale of siteConfig.locales) {
+      expect(siteConfig.htmlLang[locale]).toBeTruthy();
+      expect(siteConfig.intlLocale[locale]).toMatch(/^[a-z]{2}-[A-Z]{2}$/);
+      expect(siteConfig.openGraphLocale[locale]).toMatch(/^[a-z]{2}_[A-Z]{2}$/);
+    }
+  });
+
+  it("names a publication rather than a person", () => {
+    // Convoke has no published author identity yet, and one is never invented.
+    expect(siteConfig.publisher.type).toBe("Organization");
+    expect(siteConfig).not.toHaveProperty("author");
+  });
 });

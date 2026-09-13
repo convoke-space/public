@@ -53,6 +53,21 @@ Every pull request gets a preview URL. Previews are safe by construction:
 
 Do not defeat any of that to "test SEO on a preview".
 
+## Locales and routing
+
+Localization needs **no platform configuration**. There is no Vercel i18n
+setting, no middleware, no rewrite and no redirect: `/ko/...` and `/en/...` are
+ordinary statically generated routes, and `/` is a real page — a bilingual
+gateway that belongs to neither language.
+
+Do not enable Vercel's built-in locale detection or add a middleware redirect
+from `/`. The gateway is deterministic on purpose: it is what `x-default`
+points at, and a browser-language guess would make the entry point depend on
+the reader's headers. See `docs/ARCHITECTURE.md`.
+
+Each locale has its own feed at `/<locale>/feed.xml`; one sitemap at
+`/sitemap.xml` covers both.
+
 ## Domain
 
 Canonical hostname: `convoke.space`. If `www.convoke.space` is added later,

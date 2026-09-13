@@ -1,46 +1,60 @@
-"use client";
-
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { siteConfig, type Locale } from "../../site.config";
+import { getDictionary } from "@/lib/i18n";
+import { localePath } from "@/lib/site";
 import { Container } from "./container";
+import { LanguageSwitcher, type LanguageTarget } from "./language-switcher";
 
-export type HeaderNavItem = { href: string; label: string };
+export type HeaderNavItem = {
+  /** Locale-relative path. */
+  path: string;
+  label: string;
+};
 
+/**
+ * Rendered by each page rather than by the layout, because the language
+ * switcher's targets depend on the page: a section maps to the same section,
+ * an article maps to its counterpart — which only the page can look up.
+ */
 export function SiteHeader({
+  locale,
   nav,
-  siteName,
+  languageTargets,
+  activePath,
 }: {
+  locale: Locale;
   nav: HeaderNavItem[];
-  siteName: string;
+  languageTargets: LanguageTarget[];
+  /** Locale-relative path of the section this page belongs to. */
+  activePath?: string;
 }) {
-  const pathname = usePathname();
-
   return (
     <header className="border-b border-rule">
       <Container
         width="wide"
-        className="flex flex-wrap items-baseline gap-x-6 gap-y-2 py-4 sm:py-5"
+        className="flex flex-wrap items-baseline gap-x-6 gap-y-3 py-4 sm:py-5"
       >
         <Link
-          href="/"
+          href={localePath(locale, "/")}
           className="font-serif text-lg font-semibold tracking-tight"
-          aria-label={`${siteName} — home`}
         >
-          {siteName}
+          {siteConfig.name}
           <span className="text-accent" aria-hidden="true">
             .
           </span>
+          <span className="sr-only">{` — ${getDictionary(locale).nav.home}`}</span>
         </Link>
 
-        <nav aria-label="Primary" className="ml-auto">
+        <nav aria-label={getDictionary(locale).nav.primary} className="ml-auto">
           <ul className="flex flex-wrap items-baseline gap-x-5 gap-y-1 text-[0.9rem]">
             {nav.map((item) => {
               const active =
-                pathname === item.href || pathname.startsWith(`${item.href}/`);
+                activePath === item.path ||
+                (activePath?.startsWith(`${item.path}/`) ?? false);
               return (
-                <li key={item.href}>
+                <li key={item.path}>
                   <Link
-                    href={item.href}
+                    href={localePath(locale, item.path)}
                     aria-current={active ? "page" : undefined}
                     className={
                       active
@@ -55,6 +69,10 @@ export function SiteHeader({
             })}
           </ul>
         </nav>
+
+        <div className="border-l border-rule pl-5">
+          <LanguageSwitcher current={locale} targets={languageTargets} />
+        </div>
       </Container>
     </header>
   );

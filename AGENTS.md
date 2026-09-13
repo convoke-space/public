@@ -12,9 +12,10 @@ private working material.
 
 ## 1. What this project is
 
-Convoke.space is a personal digital platform: an editorial archive of writing,
-projects, and gatherings. It is not a portfolio template, not a SaaS landing
-page, and not a blog engine to be generalised.
+Convoke.space is a **bilingual personal publication**: an editorial archive of
+writing, projects and gatherings, published in Korean and English as equals. It
+is not a portfolio template, not a SaaS landing page, and not a blog engine to
+be generalised.
 
 It is operated as an **AI-native software system**: a human sets direction from
 a phone or a browser, cloud agents implement against GitHub, automated checks
@@ -38,6 +39,7 @@ Two consequences follow, and they drive nearly every rule below:
 | Production domain | `https://convoke.space` |
 | Production branch | `main` |
 | Host | Vercel, deploying `convoke-space/public@main` |
+| Locales | `ko` (authoring language), `en` |
 
 Always use the full repository names. The bare words "public" and "private" are
 ambiguous with GitHub visibility settings.
@@ -64,23 +66,18 @@ Therefore the following are forbidden, without exception:
 - Build tokens whose purpose is to reach private content
 - Any content synchronisation that production depends on
 
-`tests/boundary.test.ts` enforces the mechanical parts of this. A failure there
-means the architecture broke, not that the test is wrong.
+`tests/boundary.test.ts` enforces the mechanical parts of this, scanning every
+file `git` reports as tracked or newly added. A failure there means the
+architecture broke, not that the test is wrong.
 
-Material becomes public through an explicit promotion:
-
-```
-private → review → edit → sanitize → promote → public → PR → CI → merge → deploy
-```
-
-See `docs/PUBLISHING.md`.
+Material becomes public through an explicit promotion. See `docs/PUBLISHING.md`.
 
 ## 4. Security rules
 
 Never commit to `convoke-space/public`:
 
 - API keys, tokens, passwords, OAuth secrets, service-role credentials
-- Personal contact information (own or anyone else's)
+- Personal contact information (the operator's own, or anyone else's)
 - Event attendee data, customer data, or anything identifying a private person
 - Employer, client or third-party confidential material
 - Unpublished commercial information
@@ -93,7 +90,84 @@ with real values. `.env` and `.env.*` are gitignored; keep them that way.
 If a secret may have entered git history, deleting the file is **not**
 sufficient. Treat the credential as compromised: rotate it, then tell the human.
 
-## 5. Technology and dependency policy
+## 5. Language, authorship and voice
+
+This section is not a style preference. It is the product.
+
+### 5.1 Two first-class languages
+
+Korean and English are equals. Neither is a translation target bolted onto the
+other; both are published editions with their own URLs, feeds, metadata and
+navigation.
+
+The operator's authoring language is **Korean**. The normal direction of travel
+is Korean first, English adapted after.
+
+### 5.2 The English edition is an adaptation, not a translation
+
+The English edition must read as though it had been written in English from the
+start — its own rhythm, its own examples where a Korean-specific reference would
+not land, its own idiom.
+
+What it may **not** do is diverge. Across the pair, these must match:
+
+- the central claim
+- every fact and number
+- the experience being described
+- the judgement being made
+
+Changing an argument in translation is a content bug, not an editorial liberty.
+
+### 5.3 The human is the author
+
+The operator is the intellectual owner of everything published. An AI agent's
+role is:
+
+- **editor** — structure, clarity, cuts
+- **researcher** — finding and checking sources
+- **translator** — adapting between editions
+- **challenger** — arguing against a weak claim
+
+An agent is **not** the author. Concretely, never:
+
+- invent the operator's personal experience, anecdotes, habits or routines
+- attribute an opinion or judgement the operator has not expressed
+- invent a client story, a company situation, or a conversation
+- state that something is live, shipped, used in production or adopted unless
+  it verifiably is
+- write a biography, a byline, a job history or a credential
+
+When a piece needs a fact only the operator has, ask — do not fill the gap.
+
+### 5.4 No published author identity yet
+
+The operator has not settled a public author name or byline. Until they do:
+
+- structured data names an **Organization** (`siteConfig.publisher`), not a
+  `Person`
+- no `author` is asserted in metadata or JSON-LD
+- no name, pseudonym, biography or photograph is invented
+
+Do not "fix" this by inventing an identity. It is a human decision.
+
+### 5.5 Generic AI prose is a defect
+
+Avoid, in both languages:
+
+- cliché openings that restate the title
+- excessive "not X, but Y" constructions
+- a summary paragraph that repeats what was just said
+- generic motivational conclusions
+- grand claims with nothing under them
+- LinkedIn-register exaggeration
+- invented personal experience
+- artificially polished corporate voice
+
+An agent may improve clarity, structure and correctness. It must preserve the
+human's actual judgement, including the parts that are blunt, uncertain or
+unfashionable.
+
+## 6. Technology and dependency policy
 
 Current stack: Next.js (App Router), React, TypeScript, Tailwind CSS, MDX
 content on disk, deployed on Vercel.
@@ -101,6 +175,8 @@ content on disk, deployed on Vercel.
 - **YAGNI.** Do not add infrastructure for a requirement that does not exist.
   Specifically not now: database, authentication, user accounts, CMS, comments,
   newsletter backend, paid membership, attendee database, analytics stack.
+- **No i18n framework.** Two locales, a `[locale]` route segment, and a typed
+  dictionary in `src/lib/i18n.ts`. That is the whole mechanism; keep it.
 - **Prefer the platform.** If Next.js, the web platform, or twenty lines of
   local code will do it, do not add a package.
 - Every dependency is a maintenance liability for the lifetime of the site.
@@ -108,41 +184,61 @@ content on disk, deployed on Vercel.
 - Do not architect in a way that *prevents* those future capabilities. Just do
   not pre-build them.
 
-## 6. Code conventions
+## 7. Code conventions
 
 - TypeScript everywhere, `strict` on. No `any` without a comment explaining why.
 - Path alias `@/*` resolves to `src/*`.
 - Server Components by default. Add `"use client"` only when a component needs
   browser state or events.
-- Site origin, name and navigation live in `site.config.ts`. **Never hard-code
-  `https://convoke.space`** anywhere else — import from `@/lib/site`.
+- Site origin, locales and navigation live in `site.config.ts`. **Never
+  hard-code `https://convoke.space`** anywhere else — import from `@/lib/site`.
+- **Never hard-code user-facing copy in a component.** It belongs in
+  `src/lib/i18n.ts`, where TypeScript guarantees both locales define it.
+- Build every internal link with `localePath(locale, path)` so it stays inside
+  the reader's language.
 - Colours, type scale and spacing come from the tokens in
   `src/app/globals.css`. Do not introduce ad-hoc hex values in components.
 - Comments explain *why*, not *what*. Match the density of the surrounding code.
 - No web fonts, no third-party scripts, no trackers, no embeds. This is a
   product decision, not an oversight.
 
-## 7. Content conventions
+Code, comments and repository documentation are written in English, for
+technical consistency. Reader-facing copy is bilingual.
 
-Published content lives in `content/` as `.mdx`:
+## 8. Content conventions
+
+Published content lives in `content/<collection>/<locale>/` as `.mdx`:
 
 ```
-content/posts/      → /writing/<slug>
-content/projects/   → /projects/<slug>
-content/events/     → /gatherings/<slug>
+content/posts/ko/      → /ko/writing/<slug>
+content/posts/en/      → /en/writing/<slug>
+content/projects/ko/   → /ko/projects/<slug>
+content/events/en/     → /en/gatherings/<slug>
 ```
 
-- Filename is the slug. Lowercase kebab-case, no dates in the filename.
+- **The directory is the authority on locale.** There is no `locale`
+  frontmatter field, and adding one fails validation. Two sources of truth for
+  one fact is how drift starts.
+- Filename is the slug. Lowercase kebab-case; Hangul is allowed, so a Korean
+  piece gets a Korean URL. Slugs may differ between the two editions.
+- **`translationKey` is required and pairs the editions.** It is
+  locale-independent ASCII kebab-case, identical across the pair, unique within
+  a collection and locale. The language switcher, hreflang and the sitemap's
+  alternates are all built on it.
+- `translation:` declares intent when an edition is missing: `paired` (the
+  default, and checked by the tests), `pending` (the other edition is being
+  adapted), `standalone` (single-language on purpose). This is what separates a
+  deliberate partial publication from an oversight.
+- **Never generate a URL or an hreflang for an edition that does not exist.**
+- `draft: true` keeps an entry out of listings, routes, sitemap and feed. It is
+  a staging tool, not a privacy mechanism — the file is still public.
 - Frontmatter is validated by `src/lib/schema.ts`. **Unknown fields fail the
   build.** To add a field: extend the schema, document it in
   `docs/PUBLISHING.md`, extend `tests/schema.test.ts`.
-- `draft: true` keeps an entry out of listings, routes, sitemap and feed. It is
-  a staging tool, not a privacy mechanism — the file is still public.
-- Every internal link must resolve; `tests/content.test.ts` checks this.
 
-Full schema reference: `docs/PUBLISHING.md`.
+Full schema reference and the publication workflow: `docs/PUBLISHING.md`.
 
-## 8. Validation — the Definition of Done
+## 9. Validation — the Definition of Done
 
 A change is done when **all** of these pass locally and in CI:
 
@@ -157,7 +253,11 @@ npm run build       # next build (production)
 
 Beyond the commands, a change is not done until:
 
-- Affected pages were checked at mobile width (~390px) and desktop
+- Affected pages were checked **in both languages**, at mobile width (~390px)
+  and desktop
+- The language switcher lands on the right page, and offers no link where no
+  edition exists
+- `<html lang>` matches the route
 - No secrets, personal data or private material were added
 - Production still builds from `convoke-space/public` alone
 - Documentation matches what the code now does
@@ -166,7 +266,7 @@ Beyond the commands, a change is not done until:
 
 **Do not equate file creation with completion.** Run the commands.
 
-## 9. Branches and pull requests
+## 10. Branches and pull requests
 
 One task, one owner, one branch. Two agents must never work on the same branch.
 
@@ -188,7 +288,7 @@ Pull requests:
 `main` is production. During the early operating period, a human merges.
 **Two language models agreeing with each other is not a review gate.**
 
-## 10. Cross-agent review
+## 11. Cross-agent review
 
 Convoke is maintained by more than one agent family (Claude and
 ChatGPT/Codex). They share no memory. GitHub is the only collaboration layer.
@@ -207,6 +307,14 @@ correctness, broken links, type safety, responsive behaviour, accessibility,
 SEO, performance, dependency risk, security, privacy leakage, boundary
 violations, unnecessary complexity, maintainability.
 
+On any change that touches content or reader-facing copy, also review:
+
+- **bilingual consistency** — do the two editions make the same claims?
+- **human voice** — does this read as the operator, or as generic AI prose?
+- **invented substance** — is any experience, opinion or fact unattributable?
+- **locale integrity** — correct `<html lang>`, canonical, hreflang, feed,
+  switcher target, and no link that leaves the reader's language by accident
+
 Severity labels: **P0** production/security/privacy/data · **P1** must fix
 before merge · **P2** important, merge decision required · **P3** optional.
 
@@ -214,7 +322,7 @@ Do not file twenty cosmetic P3 comments to look thorough.
 
 Details: `docs/AGENT-COLLABORATION.md`.
 
-## 11. Recording decisions
+## 12. Recording decisions
 
 If a decision would surprise the next agent, write it down — in the PR body for
 a local choice, in `docs/ARCHITECTURE.md` for a structural one.
@@ -224,7 +332,7 @@ competent agent, given only this repository, plausibly do the wrong thing?* If
 yes, document it. If no, let the code speak. Documentation sprawl is its own
 failure mode.
 
-## 12. Deployment
+## 13. Deployment
 
 `convoke-space/public@main` → Vercel → `https://convoke.space`.
 
@@ -234,11 +342,12 @@ production. Do not defeat that.
 
 Details: `docs/DEPLOYMENT.md`.
 
-## 13. When to stop and ask
+## 14. When to stop and ask
 
 Ask a human only when the work genuinely requires something an agent cannot
 have: credentials, account ownership, DNS control, billing, or a decision about
-what the human wants to say publicly.
+what the human wants to say publicly — including anything covered by §5.3 and
+§5.4.
 
 Everything else — directory layout, component structure, styling organisation,
 package choices, test structure, metadata details — is yours to decide. Decide

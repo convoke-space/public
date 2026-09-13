@@ -6,7 +6,9 @@ up without any prior conversation.
 
 ## Purpose
 
-Convoke.space is a **personal digital platform**, not a developer portfolio.
+Convoke.space is a **bilingual personal publication**, not a developer
+portfolio. It publishes in Korean and English as equals, for a reader in either
+language.
 
 It exists to hold, over a long period:
 
@@ -22,6 +24,32 @@ The intended feel is closer to *an editorial publication plus a personal
 laboratory plus a professional archive* than to a landing page. Content is
 written to still be worth reading in several years, and the design is chosen to
 still look credible then.
+
+The audience is deliberately global. Work on software architecture and on
+AI-native ways of working has readers in both languages, and a piece that only
+exists in one of them reaches half of them.
+
+## Language and authorship
+
+Korean and English are both first-class: their own routes, feeds, metadata and
+navigation. The operator's authoring language is **Korean**, and the normal
+direction of travel is Korean first, English adapted after.
+
+The English edition is an **adaptation, not a translation**. It should read as
+though it had been written in English from the start. What it may not do is
+diverge: the central claim, the facts, the experience described and the
+judgement made must match across the pair.
+
+**The human is the author.** An AI agent acts as editor, researcher, translator
+and challenger. It never invents the operator's experience, opinions, clients or
+credentials, and never writes a biography or a byline. Generic AI prose —
+cliché openings, repetitive summaries, motivational conclusions, ungrounded
+grand claims — is treated as a defect, not a style choice. The full policy is
+`AGENTS.md` §5.
+
+The operator has not settled a public author identity. Until they do, Convoke
+publishes as an organisation: no `Person` in structured data, no asserted
+author, no invented name or bio.
 
 ## Operating model
 
@@ -76,17 +104,27 @@ reused across every section, no client-side analytics, no third-party embeds.
 
 ## Information architecture
 
-Home · Writing · Projects · About · Gatherings.
+`/` is a bilingual gateway belonging to neither language: an explicit choice,
+with no browser-language redirect, so behaviour is deterministic for readers and
+for `x-default`.
 
-A section with no meaningful content stays latent rather than shipping an empty
-destination — navigation only advertises collections that hold something. Home
-communicates what Convoke is and where the recent work is, before any
-biography.
+Under each locale: Home · Writing · Projects · About · Gatherings.
+
+A section with no content **in that locale** stays latent rather than shipping
+an empty destination — navigation only advertises collections that hold
+something. A missing edition never gets a URL, an `hreflang` or a
+language-switch link. Home communicates what Convoke is and where the recent
+work is, before any biography.
 
 ## Technology direction
 
 Next.js (App Router), React, TypeScript, Tailwind CSS, MDX content on disk,
 GitHub, Vercel.
+
+Localization is a `[locale]` route segment plus a typed dictionary — no i18n
+framework. Content is `content/<collection>/<locale>/`, where the directory is
+the authority on locale, and the two editions of a piece are paired by a
+locale-independent `translationKey`.
 
 Conservative dependencies. Prefer built-in platform capability. Follow YAGNI:
 no database, authentication, CMS, comments, newsletter backend, membership, or
@@ -137,5 +175,10 @@ Recorded so nobody re-litigates them by accident:
   dependency-free, tested code.
 - **No `cover` image field, and no `featured` flag** — social cards are
   generated from titles, and no page curates by hand yet.
-- **No personal biography on the About page** — the platform describes itself;
-  the byline is the owner's to write.
+- **No personal biography and no asserted author** — the publication describes
+  itself; the identity is the operator's to settle.
+- **No i18n framework, no browser-language redirect, no locale cookie** — two
+  locales do not justify the machinery, and an explicit choice cannot guess
+  wrong.
+- **No seed editorial articles** — the Writing section ships empty rather than
+  carrying AI-written prose under the operator's name.

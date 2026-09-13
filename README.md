@@ -1,7 +1,8 @@
 # convoke-space/public
 
-Public source for **[convoke.space](https://convoke.space)** — a personal
-digital platform holding writing, projects, and gatherings.
+Public source for **[convoke.space](https://convoke.space)** — a bilingual
+personal publication holding writing, projects, and gatherings, in Korean and
+English as equals.
 
 > Everything in this repository is public and permanent. Assume every commit is
 > indexed the moment it is pushed. Private drafts and working material live in
@@ -23,19 +24,38 @@ Next.js (App Router) · React · TypeScript · Tailwind CSS · MDX content on di
 deployed on Vercel.
 
 No database, no CMS, no authentication, no analytics, no web fonts, no
-third-party scripts. Content is files in git; publishing is a pull request.
+third-party scripts, and no i18n framework. Content is files in git; publishing
+is a pull request.
 
 ## Layout
 
 ```
-site.config.ts   canonical origin, site name, navigation
-content/         posts · projects · events  →  /writing · /projects · /gatherings
-src/app/         routes, sitemap, robots, RSS feed, generated social cards
+site.config.ts   canonical origin, supported locales, navigation
+content/         posts · projects · events, each split by locale (ko / en)
+src/app/
+  (gateway)/     the locale-neutral `/` language gateway
+  [locale]/      every localized route, plus a per-locale RSS feed
 src/components/  presentational building blocks
-src/lib/         content loader, frontmatter schema, SEO, site origin
-tests/           vitest — schema, content, origin resolution, boundary/secrets
+src/lib/         content loader, schema, i18n dictionary, alternates, SEO
+tests/           vitest — schema, content, routing, dictionary, sitemap, boundary
 docs/            architecture, operations, publishing, deployment, collaboration
 ```
+
+## Languages
+
+`/` is a bilingual gateway that belongs to neither language — an explicit
+choice, with no browser-language redirect. Everything else lives under `/ko` or
+`/en`.
+
+Content is `content/<collection>/<locale>/`, where the directory is the
+authority on locale, and the two editions of one piece are paired by a
+locale-independent `translationKey`. Slugs may differ per language, and Korean
+slugs may be Hangul. An edition that does not exist never gets a URL, an
+`hreflang`, or a language-switch link.
+
+The English edition is an adaptation, not a literal translation — but the
+claims, facts and judgements must match across the pair. The author is a human;
+see [`AGENTS.md`](AGENTS.md) §5.
 
 ## Working on this repository
 

@@ -1,80 +1,134 @@
 import type { Metadata } from "next";
-import { absoluteUrl, canonicalUrl, siteConfig } from "./site";
+import { LOCALES, siteConfig, type Locale } from "../../site.config";
+import { getDictionary } from "./i18n";
+import { canonicalUrl, localePath } from "./site";
+
+/**
+ * A page's locale alternates: for each locale, the locale-relative path of the
+ * edition that actually exists. A locale is simply absent when that edition has
+ * not been published — hreflang and the language switcher must never point at a
+ * URL that does not exist.
+ */
+export type LocaleAlternates = Partial<Record<Locale, string>>;
+
+/** Same path in every locale. Correct for sections, indexes and static pages. */
+export function sharedAlternates(path: string): LocaleAlternates {
+  return Object.fromEntries(LOCALES.map((locale) => [locale, path]));
+}
 
 type PageMetaInput = {
+  locale: Locale;
+  /** Locale-relative path, e.g. "/writing/some-post". */
+  path: string;
   title?: string;
   description?: string;
-  /** Site-relative path, e.g. "/writing/some-post". */
-  path: string;
   type?: "website" | "article";
   publishedTime?: string;
   modifiedTime?: string;
   tags?: string[];
+  /** Locale-relative paths of the editions that exist. */
+  alternates?: LocaleAlternates;
   /** Set when the piece was first published elsewhere. */
   canonicalOverride?: string;
+  /** Whether `/` is the locale-neutral entry point for this page. */
+  includeXDefault?: boolean;
 };
 
 /**
- * Every page builds its metadata here so canonical URLs, Open Graph and
- * Twitter cards stay consistent. `metadataBase` is set once in the root layout.
+ * Every page builds its metadata here, so canonical URLs, hreflang, Open Graph
+ * and Twitter cards stay consistent. `metadataBase` is set in the root layout.
  */
 export function pageMetadata({
-  title,
-  description = siteConfig.description,
+  locale,
   path,
+  title,
+  description,
   type = "website",
   publishedTime,
   modifiedTime,
   tags,
+  alternates,
   canonicalOverride,
+  includeXDefault = false,
 }: PageMetaInput): Metadata {
-  const url = canonicalUrl(path);
-  const resolvedTitle = title ? `${title} — ${siteConfig.name}` : undefined;
+  const dict = getDictionary(locale);
+  const resolvedDescription = description ?? dict.siteDescription;
+  const canonical = canonicalUrl(localePath(locale, path));
+  const resolvedTitle = title ? `${title} — ${siteConfig.name}` : siteConfig.name;
+
+  const languages: Record<string, string> = {};
+  for (const [alternateLocale, alternatePath] of Object.entries(
+    alternates ?? {},
+  ) as [Locale, string][]) {
+    languages[siteConfig.htmlLang[alternateLocale]] = canonicalUrl(
+      localePath(alternateLocale, alternatePath),
+    );
+  }
+  if (includeXDefault) languages["x-default"] = canonicalUrl("/");
+
+  const alternateOpenGraphLocales = (Object.keys(alternates ?? {}) as Locale[])
+    .filter((l) => l !== locale)
+    .map((l) => siteConfig.openGraphLocale[l]);
 
   return {
     title,
-    description,
+    description: resolvedDescription,
     alternates: {
-      canonical: canonicalOverride ?? url,
+      canonical: canonicalOverride ?? canonical,
+      ...(Object.keys(languages).length > 0 ? { languages } : {}),
       types: {
         "application/rss+xml": [
-          { url: absoluteUrl("/feed.xml"), title: `${siteConfig.name} — Writing` },
+          {
+            url: canonicalUrl(localePath(locale, "/feed.xml")),
+            title: dict.feed.title,
+          },
         ],
       },
     },
     openGraph: {
       type,
-      url,
-      title: resolvedTitle ?? siteConfig.name,
-      description,
+      url: canonical,
+      title: resolvedTitle,
+      description: resolvedDescription,
       siteName: siteConfig.name,
-      locale: siteConfig.locale,
-      ...(type === "article"
-        ? { publishedTime, modifiedTime, tags, authors: [siteConfig.author.name] }
+      locale: siteConfig.openGraphLocale[locale],
+      ...(alternateOpenGraphLocales.length > 0
+        ? { alternateLocale: alternateOpenGraphLocales }
         : {}),
+      // No `authors`: Convoke has no published author identity yet, and one is
+      // never invented. See AGENTS.md §5.
+      ...(type === "article" ? { publishedTime, modifiedTime, tags } : {}),
     },
     twitter: {
       card: "summary_large_image",
-      title: resolvedTitle ?? siteConfig.name,
-      description,
+      title: resolvedTitle,
+      description: resolvedDescription,
     },
   };
 }
 
 type JsonLd = Record<string, unknown>;
 
-export function websiteJsonLd(): JsonLd {
+/** Convoke is a publication. Until an author identity exists, so is its owner. */
+function publisher(): JsonLd {
+  return { "@type": siteConfig.publisher.type, name: siteConfig.publisher.name };
+}
+
+export function websiteJsonLd(locale: Locale): JsonLd {
+  const dict = getDictionary(locale);
   return {
     "@context": "https://schema.org",
     "@type": "WebSite",
     name: siteConfig.name,
-    url: canonicalUrl("/"),
-    description: siteConfig.description,
-    inLanguage: siteConfig.locale,
+    url: canonicalUrl(localePath(locale, "/")),
+    description: dict.siteDescription,
+    inLanguage: siteConfig.htmlLang[locale],
+    publisher: publisher(),
   };
 }
 
 export function articleJsonLd(input: {
+  locale: Locale;
   title: string;
   description: string;
   path: string;
@@ -82,23 +136,24 @@ export function articleJsonLd(input: {
   dateModified?: string;
   tags?: string[];
 }): JsonLd {
+  const url = canonicalUrl(localePath(input.locale, input.path));
   return {
     "@context": "https://schema.org",
     "@type": "Article",
     headline: input.title,
     description: input.description,
-    url: canonicalUrl(input.path),
-    mainEntityOfPage: canonicalUrl(input.path),
+    url,
+    mainEntityOfPage: url,
     datePublished: input.datePublished,
     dateModified: input.dateModified ?? input.datePublished,
-    inLanguage: siteConfig.locale,
-    author: { "@type": "Person", name: siteConfig.author.name },
-    publisher: { "@type": "Organization", name: siteConfig.name },
+    inLanguage: siteConfig.htmlLang[input.locale],
+    publisher: publisher(),
     ...(input.tags?.length ? { keywords: input.tags.join(", ") } : {}),
   };
 }
 
 export function eventJsonLd(input: {
+  locale: Locale;
   title: string;
   description: string;
   path: string;
@@ -108,6 +163,7 @@ export function eventJsonLd(input: {
   format: "in-person" | "online" | "hybrid";
   registrationUrl?: string;
 }): JsonLd {
+  const url = canonicalUrl(localePath(input.locale, input.path));
   const attendanceMode = {
     "in-person": "https://schema.org/OfflineEventAttendanceMode",
     online: "https://schema.org/OnlineEventAttendanceMode",
@@ -119,16 +175,20 @@ export function eventJsonLd(input: {
     "@type": "Event",
     name: input.title,
     description: input.description,
-    url: canonicalUrl(input.path),
+    url,
+    inLanguage: siteConfig.htmlLang[input.locale],
     startDate: input.startDate,
     ...(input.endDate ? { endDate: input.endDate } : {}),
     eventAttendanceMode: attendanceMode,
     eventStatus: "https://schema.org/EventScheduled",
     location:
       input.format === "online"
-        ? { "@type": "VirtualLocation", url: input.registrationUrl ?? canonicalUrl(input.path) }
+        ? { "@type": "VirtualLocation", url: input.registrationUrl ?? url }
         : { "@type": "Place", name: input.location, address: input.location },
-    organizer: { "@type": "Organization", name: siteConfig.name, url: canonicalUrl("/") },
+    organizer: {
+      ...publisher(),
+      url: canonicalUrl(localePath(input.locale, "/")),
+    },
     ...(input.registrationUrl
       ? {
           offers: {
@@ -142,6 +202,7 @@ export function eventJsonLd(input: {
 }
 
 export function breadcrumbJsonLd(
+  locale: Locale,
   trail: { name: string; path: string }[],
 ): JsonLd {
   return {
@@ -151,7 +212,7 @@ export function breadcrumbJsonLd(
       "@type": "ListItem",
       position: index + 1,
       name: item.name,
-      item: canonicalUrl(item.path),
+      item: canonicalUrl(localePath(locale, item.path)),
     })),
   };
 }

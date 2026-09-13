@@ -38,10 +38,19 @@
   --accent: #96351b;
   --accent-soft: #f2e7e1;
 
+  /*
+   * Korean families are appended rather than switched on `:lang()`. Font
+   * fallback is per-glyph, so Latin takes the serif or sans face and Hangul
+   * falls through to the first Korean family the reader's system has. Still no
+   * web fonts in either language.
+   */
   --font-serif: ui-serif, "Iowan Old Style", "Palatino Linotype", Palatino,
-    "Source Serif 4", Charter, Georgia, Cambria, "Times New Roman", serif;
+    "Source Serif 4", Charter, Georgia, Cambria, "Times New Roman",
+    "Apple SD Gothic Neo", "Noto Serif KR", "Nanum Myeongjo", "Malgun Gothic",
+    serif;
   --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
-    "Helvetica Neue", Arial, "Apple Color Emoji", "Segoe UI Emoji", sans-serif;
+    "Helvetica Neue", Arial, "Apple SD Gothic Neo", "Noto Sans KR",
+    "Malgun Gothic", "Apple Color Emoji", "Segoe UI Emoji", sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
     "Liberation Mono", monospace;
 
@@ -127,6 +136,29 @@
     max-width: 100%;
     height: auto;
   }
+}
+
+/*
+ * Korean wraps mid-word by default, which shreds readability. `keep-all` breaks
+ * on word boundaries instead; the slightly looser leading accounts for the
+ * taller Hangul glyph box.
+ */
+:lang(ko) {
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+
+:lang(ko) h1,
+:lang(ko) h2,
+:lang(ko) h3,
+:lang(ko) h4 {
+  letter-spacing: -0.02em;
+}
+
+.prose:lang(ko),
+:lang(ko) .prose {
+  line-height: 1.85;
+  font-size: 1.125rem;
 }
 
 @media (prefers-reduced-motion: reduce) {
