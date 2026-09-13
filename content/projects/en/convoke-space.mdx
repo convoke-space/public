@@ -1,0 +1,53 @@
+---
+title: Convoke.space
+description: The publishing system this site runs on — two repositories, Korean and English as equals, and a static site maintained by agents.
+date: "2026-09-13"
+status: active
+translationKey: convoke-space
+tags: ["next.js", "typescript", "bilingual", "publishing"]
+repo: https://github.com/convoke-space/public
+---
+
+Convoke.space is both a site and the system that publishes it. What follows is
+a record of what the repository actually contains today.
+
+## How it is built
+
+- **Next.js App Router**, TypeScript, Tailwind CSS. Content is MDX on disk,
+  generated statically at build time.
+- **No database, no authentication, no CMS.** Content is files in Git, and
+  adding a piece is one pull request.
+- **No web fonts and no client-side analytics.** Typography uses only faces the
+  reader's operating system already has.
+- **A hand-written frontmatter validator.** Around three hundred
+  dependency-free lines that report every problem in a file at once and fail
+  the build on an unknown field.
+
+## The bilingual structure
+
+Korean and English are equal first-class routes.
+
+- Content lives under `content/<collection>/<locale>/`, and the directory is
+  the authority on locale. It is not duplicated in frontmatter.
+- The two editions of one piece are linked by `translationKey`. Their slugs may
+  differ per locale.
+- `/` belongs to neither language: it is an explicit choice, with no
+  browser-language redirect.
+- When an edition does not exist, neither its URL nor its hreflang is
+  generated.
+
+## How it is operated
+
+There are two repositories. `convoke-space/public` holds the application and
+everything published; `convoke-space/private` holds drafts and working
+material. Production builds from the public repository alone — no
+cross-repository clone, no build token, no runtime fetch.
+
+Changes happen on task branches owned by exactly one person or agent at a time,
+arrive as pull requests, pass lint, typecheck, tests and a production build,
+and are merged by a human.
+
+## Status
+
+Not yet deployed to production. The first merge and the domain connection are
+still outstanding.

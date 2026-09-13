@@ -1,0 +1,42 @@
+{
+  "name": "convoke-space",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Source for convoke.space — a personal digital platform and public archive.",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint .",
+    "typecheck": "next typegen && tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "verify": "npm run lint && npm run typecheck && npm run test && npm run build && npm run verify:http",
+    "lint:fix": "eslint . --fix",
+    "verify:http": "node scripts/verify-http.mjs"
+  },
+  "dependencies": {
+    "gray-matter": "^4.0.3",
+    "next": "^16.3.5",
+    "next-mdx-remote": "^6.0.0",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "rehype-autolink-headings": "^7.1.0",
+    "rehype-slug": "^6.0.0",
+    "remark-gfm": "^4.0.1"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.3.3",
+    "@types/node": "^22.15.0",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "eslint": "^9.39.5",
+    "eslint-config-next": "^16.3.5",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^5.9.3",
+    "vitest": "^5.0.0"
+  }
+}
