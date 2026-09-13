@@ -37,7 +37,7 @@ src/app/
   [locale]/      every localized route, plus a per-locale RSS feed
 src/components/  presentational building blocks
 src/lib/         content loader, schema, i18n dictionary, alternates, SEO
-tests/           vitest — schema, content, routing, dictionary, sitemap, boundary
+tests/           vitest — schema, content, routing, dictionary, sitemap, 404, boundary
 docs/            architecture, operations, publishing, deployment, collaboration
 ```
 
@@ -85,7 +85,9 @@ One task, one owner, one branch. `main` is production and a human merges.
 
 **Production must be reproducible from this repository alone.** No submodules,
 no build-time clone of the private repository, no runtime dependency on it.
-`tests/boundary.test.ts` enforces it.
+`tests/boundary.test.ts` enforces it by parsing the lockfile for dependencies
+resolved outside the public npm registry, and guards against committed
+credentials with a pattern check over every tracked file.
 
 ## Licence
 

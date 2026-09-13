@@ -82,15 +82,23 @@ Open Graph `alternateLocale`, and the sitemap's language alternates.
 Allowed, and made explicit rather than inferred. The `translation` field says
 which situation you are in:
 
-| Value | Meaning | Missing counterpart is… |
+| Value | Meaning | Required state of the other edition |
 | --- | --- | --- |
-| `paired` (default) | both editions are expected | **a test failure** |
-| `pending` | the other edition is being adapted | fine, for now |
-| `standalone` | single-language on purpose | fine, permanently |
+| `paired` (default) | both editions are published | must exist, and must also be `paired` |
+| `pending` | the other edition is being adapted | must **not** be published yet |
+| `standalone` | single-language on purpose | must **not** exist |
 
-`npm test` fails on a `paired` entry with no counterpart, which is what
-separates an oversight from a decision. Nothing else changes: a missing edition
-never gets a URL, an `hreflang`, or a language-switch link.
+The check runs in both directions, so these all fail `npm test`:
+
+- `paired` with no counterpart — the ordinary oversight
+- `pending` when the counterpart is already live — a stale state nobody updated
+- `ko: paired` alongside `en: standalone` — the pair disagrees with itself
+- both published editions marked `standalone` — they are a pair, by definition
+
+So when you publish the second edition, update the first one's `translation`
+back to `paired` (or just delete the field — `paired` is the default). Nothing
+else changes: a missing edition never gets a URL, an `hreflang`, or a
+language-switch link.
 
 ## Frontmatter schema
 

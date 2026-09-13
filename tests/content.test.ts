@@ -6,7 +6,7 @@ import {
   clearContentCache,
   COLLECTIONS,
   CONTENT_ROOT,
-  findPairingProblems,
+  findTranslationProblems,
   getCounterpart,
   getEntry,
   getEntryByTranslationKey,
@@ -118,16 +118,64 @@ describe("translation pairing", () => {
   });
 
   it("separates a deliberate single-language edition from a missing one", () => {
-    const problems = findPairingProblems(FIXTURES);
-    const sources = problems.map((p) => p.source);
+    const problems = findTranslationProblems(FIXTURES);
+    const keys = problems.map((p) => p.translationKey);
 
     // `pending` and `standalone` opt out; the default `paired` does not.
-    expect(sources).not.toContain("content/posts/ko/번역-대기중.mdx");
-    expect(sources).not.toContain("content/posts/ko/단일-언어.mdx");
-    expect(sources).toContain("content/posts/en/missing-pair.mdx");
-    expect(problems.find((p) => p.translationKey === "missing-pair")?.missingLocale).toBe(
-      "ko",
+    expect(keys).not.toContain("awaiting-translation");
+    expect(keys).not.toContain("korean-only");
+    expect(keys).toContain("missing-pair");
+
+    const missing = problems.find((p) => p.translationKey === "missing-pair")!;
+    expect(missing.sources).toEqual(["content/posts/en/missing-pair.mdx"]);
+    expect(missing.reason).toMatch(/no published ko edition/);
+  });
+});
+
+describe("translation state contradictions", () => {
+  const CONTRADICTIONS = path.join(__dirname, "fixtures", "contradictions");
+  const problems = () => findTranslationProblems(CONTRADICTIONS);
+  const reasonFor = (key: string) =>
+    problems().find((p) => p.translationKey === key)?.reason ?? "";
+
+  it("rejects two published editions that both claim to stand alone", () => {
+    expect(reasonFor("both-published-standalone")).toMatch(
+      /published in 2 locales.*must be "paired"/s,
     );
+  });
+
+  it("rejects pending when the counterpart is already published", () => {
+    const reason = reasonFor("stale-pending");
+    expect(reason).toMatch(/published in 2 locales/);
+    expect(reason).toContain('content/posts/ko/짝이있는데-pending.mdx is "pending"');
+  });
+
+  it("rejects a pair whose two sides disagree", () => {
+    const reason = reasonFor("mismatched-states");
+    expect(reason).toMatch(/published in 2 locales/);
+    expect(reason).toContain('content/posts/en/mismatched-states.mdx is "standalone"');
+  });
+
+  it("names every file involved, so the fix is obvious", () => {
+    const problem = problems().find(
+      (p) => p.translationKey === "mismatched-states",
+    )!;
+    expect(problem.sources).toEqual([
+      "content/posts/en/mismatched-states.mdx",
+      "content/posts/ko/상태-불일치.mdx",
+    ]);
+    expect(problem.collection).toBe("posts");
+  });
+
+  it("accepts a consistent pair", () => {
+    expect(problems().map((p) => p.translationKey)).not.toContain(
+      "consistent-pair",
+    );
+  });
+
+  it("reports each contradiction once, not once per file", () => {
+    const keys = problems().map((p) => p.translationKey);
+    expect(new Set(keys).size).toBe(keys.length);
   });
 });
 
@@ -161,12 +209,12 @@ describe("the published archive", () => {
     }
   });
 
-  it("has no accidentally missing translation", () => {
+  it("declares translation states that match what is actually published", () => {
     // An intentional single-language edition sets `translation: pending` or
     // `standalone`. Anything else here is an oversight — see docs/PUBLISHING.md.
     expect(
-      findPairingProblems().map(
-        (p) => `${p.source} has no ${p.missingLocale} edition`,
+      findTranslationProblems().map(
+        (p) => `${p.sources.join(", ")}: ${p.reason}`,
       ),
     ).toEqual([]);
   });

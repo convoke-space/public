@@ -280,38 +280,84 @@ export function allPublished(root: string = CONTENT_ROOT): Entry[] {
   );
 }
 
-export type PairingProblem = {
-  source: string;
-  missingLocale: Locale;
+export type TranslationProblem = {
+  /** Every source file the problem involves, so the message is actionable. */
+  sources: string[];
+  collection: Collection;
   translationKey: string;
+  reason: string;
 };
 
 /**
- * Entries that claim to be paired but have no counterpart.
+ * Contradictions between an entry's declared `translation` state and what is
+ * actually published.
  *
- * This is what separates an accidental missing translation from a deliberate
- * single-language edition: `translation: pending` or `standalone` opts out.
- * Asserted by tests/content.test.ts rather than thrown here, so a half-finished
- * pair can still be previewed locally.
+ * The rule is deliberately one sentence, not a state machine:
+ *
+ *   - a translationKey published in more than one locale must be `paired`
+ *     everywhere;
+ *   - a translationKey published in exactly one locale must be `pending` or
+ *     `standalone` there.
+ *
+ * That covers every contradiction worth catching — `paired` with no
+ * counterpart, `pending` or `standalone` when the counterpart is already live,
+ * a pair where the two sides disagree, and two published editions that both
+ * claim to stand alone.
+ *
+ * Reported rather than thrown, so a half-finished pair can still be previewed
+ * locally; tests/content.test.ts asserts the list is empty.
  */
-export function findPairingProblems(
+export function findTranslationProblems(
   root: string = CONTENT_ROOT,
-): PairingProblem[] {
-  const problems: PairingProblem[] = [];
-  for (const entry of allPublished(root)) {
-    const state = entry.frontmatter.translation ?? "paired";
-    if (state !== "paired") continue;
+): TranslationProblem[] {
+  const problems: TranslationProblem[] = [];
+
+  for (const collection of COLLECTIONS) {
+    const byKey = new Map<string, Entry[]>();
     for (const locale of LOCALES) {
-      if (locale === entry.locale) continue;
-      if (!getCounterpart(entry, locale, root)) {
+      for (const entry of published(collection, locale, root)) {
+        const group = byKey.get(entry.translationKey) ?? [];
+        group.push(entry);
+        byKey.set(entry.translationKey, group);
+      }
+    }
+
+    for (const [translationKey, group] of byKey) {
+      const sources = group.map((e) => e.source).sort();
+      const state = (entry: Entry) => entry.frontmatter.translation ?? "paired";
+
+      if (group.length > 1) {
+        const dissenting = group.filter((entry) => state(entry) !== "paired");
+        if (dissenting.length > 0) {
+          problems.push({
+            sources,
+            collection,
+            translationKey,
+            reason:
+              `published in ${group.length} locales, so every edition must be "paired", but ` +
+              dissenting
+                .map((entry) => `${entry.source} is "${state(entry)}"`)
+                .join(", "),
+          });
+        }
+        continue;
+      }
+
+      const only = group[0]!;
+      if (state(only) === "paired") {
+        const missing = LOCALES.filter((locale) => locale !== only.locale);
         problems.push({
-          source: entry.source,
-          missingLocale: locale,
-          translationKey: entry.translationKey,
+          sources,
+          collection,
+          translationKey,
+          reason:
+            `is "paired" but has no published ${missing.join("/")} edition — ` +
+            `set translation: pending or standalone if that is deliberate`,
         });
       }
     }
   }
+
   return problems;
 }
 

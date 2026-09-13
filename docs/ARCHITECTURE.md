@@ -64,10 +64,47 @@ contract.
 
 ### Unknown locales and unknown paths
 
-`app/[locale]/layout.tsx` sets `dynamicParams = false` over
-`generateStaticParams` of `ko` and `en`, so `/fr` is a 404. Inside a valid
-locale, `app/[locale]/[...rest]/page.tsx` catches anything unmatched so the
-reader gets the localized 404 rather than the bilingual root one.
+`app/[locale]/layout.tsx` keeps `dynamicParams = true` so an unsupported prefix
+such as `/fr` still reaches a page that can 404 properly. The layout itself must
+**not** call `notFound()`: a layout that throws is the one that would have
+contained the boundary, and Next then has nothing to render it in
+(`NoFallbackError`). It renders a document shell for the default locale instead,
+and the page below it 404s.
+
+Inside a valid locale, `app/[locale]/[...rest]/page.tsx` catches anything
+unmatched, and `dynamicParams = false` on each `[slug]` route turns an unknown
+slug into a 404 as well. Every one of those paths ends in the same boundary:
+`app/[locale]/not-found.tsx`.
+
+### What a not-found boundary can and cannot do
+
+Three constraints were established empirically against Next 16, and the 404 is
+built around them. Do not "simplify" past them without re-testing:
+
+1. **A not-found boundary renders outside the root layout.** There is no
+   `<html lang>`, no header, no footer, and the layout's stylesheet is not
+   linked — including when there is only one root layout, so this is not a cost
+   of the gateway split.
+2. **A Client Component inside the boundary fails to render at all**
+   (`NoFallbackError`), so `usePathname()` is not available to detect the
+   locale.
+3. **No request header carries the path**, so a Server Component cannot derive
+   it either.
+
+`src/lib/request-locale.ts` closes the gap: a `React.cache` store, which is
+request-scoped in the RSC runtime, lets the locale layout record the locale it
+matched and lets the 404 read it back. A `null` value means the prefix was not a
+supported locale, and the 404 falls back to offering both languages rather than
+guessing.
+
+The 404 therefore carries its own `lang` attribute and its own inline
+stylesheet. Those token values are the only duplicate of `src/app/globals.css`
+in the codebase, and the file says so.
+
+One residual limitation, worth knowing and not worth fighting: Next streams the
+not-found tree as flight data inside its own error document, so a 404 body is
+**client-rendered**. The status code is correct for crawlers, which is what a
+404 is judged on; the localized content is for humans.
 
 ### Header placement
 
@@ -111,10 +148,20 @@ the *published* index in every case — including the entry's own locale — so 
 draft has no counterpart anywhere and can never acquire an `hreflang` or a
 switcher link.
 
-`findPairingProblems()` reports entries that claim `translation: paired` but
-have no counterpart. `tests/content.test.ts` asserts it is empty, which is what
-separates an accidental missing translation from a deliberate partial
-publication (`pending` / `standalone`).
+`findTranslationProblems()` checks the declared `translation` state against what
+is actually published, in both directions. The rule is one sentence rather than
+a state machine:
+
+- a `translationKey` published in more than one locale must be `paired`
+  everywhere;
+- a `translationKey` published in exactly one locale must be `pending` or
+  `standalone` there.
+
+That covers every contradiction worth catching — `paired` with no counterpart,
+`pending` or `standalone` once the counterpart is live, a pair whose two sides
+disagree, and two published editions that both claim to stand alone.
+`tests/content.test.ts` asserts the list is empty, which is what separates an
+oversight from a deliberate partial publication.
 
 ### Why a hand-written validator
 
@@ -220,18 +267,33 @@ never as a link that would 404.
 | `i18n-dictionary.test.ts` | both dictionaries complete, and actually in their own language |
 | `sitemap-feed.test.ts` | bilingual sitemap, alternate targets, per-locale RSS |
 | `site.test.ts` | origin resolution across local, preview and production |
-| `boundary.test.ts` | no private-repo dependency, no submodules, no secrets |
+| `boundary.test.ts` | dependency-boundary checks on package.json and the lockfile, a credential-pattern guard, no submodules |
 
 Bilingual fixtures live in `tests/fixtures/`, covering a paired entry with
 differing slugs, a Hangul slug, `pending` and `standalone` editions, an
 accidentally unpaired entry, a draft, a duplicate `translationKey` and an
 invalid filename.
 
-`boundary.test.ts` is an architecture test. It takes its file list from `git
-ls-files --cached --others --exclude-standard`, so it covers everything tracked
-*and* everything newly created but not yet staged; exclusions are explicit and
-each carries a stated reason. When it fails, the architecture broke — the fix is
-in the code, not the test.
+`boundary.test.ts` is an architecture test, and it is two things rather than
+one:
+
+- A **structural dependency-boundary check**. It parses `package.json` and
+  `package-lock.json` — both the modern `packages` shape and the legacy
+  `dependencies` shape — and rejects any package resolved from a git URL, a
+  local path, a symlink, a `convoke-space` URL, or any host other than
+  `registry.npmjs.org`. That is the realistic way production would come to
+  depend on the private repository or on one machine. Negative fixtures prove
+  each case is actually caught.
+- A **pattern-based credential guard** over every file `git` reports as tracked
+  or newly added, matching a fixed list of well-known credential shapes. It is
+  deliberately not described as a secret scanner: it will not catch a secret in
+  an unrecognised format, and it does not replace GitHub secret scanning. The
+  lockfile is excluded from this half because its integrity hashes trip the
+  patterns; it is covered structurally instead.
+
+Exclusions are explicit and each carries a stated reason, which a test asserts.
+When either half fails, the architecture broke — the fix is in the code, not the
+test.
 
 ## Deliberate constraints
 

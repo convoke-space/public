@@ -61,6 +61,9 @@ Beyond `npm run verify`, check in **both** languages:
 - [ ] the language switcher lands on the counterpart, not the section index
 - [ ] a piece with no counterpart offers no link — and no `hreflang`
 - [ ] navigation and footer links stay inside the reader's locale
+- [ ] `/ko/<nonexistent>` 404s in Korean and `/en/<nonexistent>` in English,
+      each linking only into its own locale; `/fr` offers both languages
+      (404 bodies are client-rendered — check in a browser, not with `curl`)
 - [ ] `/ko/feed.xml` and `/en/feed.xml` each carry only their own language
 - [ ] `/sitemap.xml` lists both locales with correct alternates
 - [ ] Korean text wraps on word boundaries, not mid-word
@@ -110,9 +113,15 @@ still worth doing.
 
 ## Health checks worth running occasionally
 
-- `https://convoke.space/sitemap.xml` lists every published page and nothing else
+- `https://convoke.space/` offers both languages and redirects nowhere
+- `https://convoke.space/ko` and `https://convoke.space/en` each render in
+  their own language, with `<html lang>` to match
+- `https://convoke.space/sitemap.xml` lists every published page in both
+  locales, with alternates only for editions that exist
 - `https://convoke.space/robots.txt` allows crawling and names the sitemap
-- `https://convoke.space/feed.xml` parses and shows the newest post first
+- `https://convoke.space/ko/feed.xml` and `https://convoke.space/en/feed.xml`
+  each parse, carry only their own language, and show that language's newest
+  post first
 - A post's `og:image` renders correctly in a social-card debugger
 - Lighthouse or PageSpeed on a post page, at mobile width
 

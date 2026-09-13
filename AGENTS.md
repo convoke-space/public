@@ -66,9 +66,13 @@ Therefore the following are forbidden, without exception:
 - Build tokens whose purpose is to reach private content
 - Any content synchronisation that production depends on
 
-`tests/boundary.test.ts` enforces the mechanical parts of this, scanning every
-file `git` reports as tracked or newly added. A failure there means the
-architecture broke, not that the test is wrong.
+`tests/boundary.test.ts` enforces the mechanical parts of this two ways: it
+parses `package.json` and `package-lock.json` and rejects any dependency
+resolved from a git URL, a local path or a host other than the public npm
+registry, and it runs a credential-pattern guard over every file `git` reports
+as tracked or newly added. The second half matches known credential shapes, not
+arbitrary secrets — it is a guard, not a secret scanner. A failure in either
+means the architecture broke, not that the test is wrong.
 
 Material becomes public through an explicit promotion. See `docs/PUBLISHING.md`.
 

@@ -1,8 +1,8 @@
-import { notFound } from "next/navigation";
 import type { Metadata, Viewport } from "next";
 import "../globals.css";
-import { LOCALES, siteConfig, type Locale } from "../../../site.config";
+import { DEFAULT_LOCALE, LOCALES, siteConfig, type Locale } from "../../../site.config";
 import { getDictionary, isLocale } from "@/lib/i18n";
+import { setRequestLocale } from "@/lib/request-locale";
 import { absoluteUrl, canonicalUrl, isIndexable, localePath } from "@/lib/site";
 
 /**
@@ -20,15 +20,27 @@ export function generateStaticParams(): { locale: Locale }[] {
   return LOCALES.map((locale) => ({ locale }));
 }
 
-export const dynamicParams = false;
+/**
+ * An unsupported prefix such as `/fr` renders on demand so that the page below
+ * can 404 into the shared boundary, rather than hitting Next's bare built-in
+ * page. This layout must not call `notFound()` itself: a layout that throws is
+ * the one that would have contained the boundary, and Next then has nothing to
+ * render it in.
+ */
+export const dynamicParams = true;
 
 export async function generateMetadata({
   params,
 }: {
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
-  const { locale } = await params;
-  if (!isLocale(locale)) notFound();
+  const { locale: raw } = await params;
+  if (!isLocale(raw)) {
+    // Unsupported prefix: the page below will 404. Say nothing indexable here.
+    return { metadataBase: new URL(absoluteUrl("/")), robots: { index: false, follow: false } };
+  }
+  const locale = raw;
+  setRequestLocale(locale);
   const dict = getDictionary(locale);
 
   return {
@@ -77,17 +89,21 @@ export default async function LocaleLayout({
   children: React.ReactNode;
   params: Promise<{ locale: string }>;
 }) {
-  const { locale } = await params;
-  if (!isLocale(locale)) notFound();
+  const { locale: raw } = await params;
+  const locale = isLocale(raw) ? raw : null;
+  if (locale) setRequestLocale(locale);
+
+  // An unsupported prefix still needs a document shell for the 404 below it.
+  const documentLocale = locale ?? DEFAULT_LOCALE;
 
   return (
-    <html lang={siteConfig.htmlLang[locale]}>
+    <html lang={siteConfig.htmlLang[documentLocale]}>
       <body className="flex min-h-dvh flex-col antialiased">
         <a
           href="#main"
           className="sr-only focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:z-50 focus:rounded focus:bg-surface focus:px-3 focus:py-2 focus:text-sm focus:shadow"
         >
-          {getDictionary(locale).skipToContent}
+          {getDictionary(documentLocale).skipToContent}
         </a>
         {children}
       </body>
