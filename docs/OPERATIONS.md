@@ -61,9 +61,8 @@ Beyond `npm run verify`, check in **both** languages:
 - [ ] the language switcher lands on the counterpart, not the section index
 - [ ] a piece with no counterpart offers no link — and no `hreflang`
 - [ ] navigation and footer links stay inside the reader's locale
-- [ ] `/ko/<nonexistent>` 404s in Korean and `/en/<nonexistent>` in English,
-      each linking only into its own locale; `/fr` offers both languages
-      (404 bodies are client-rendered — check in a browser, not with `curl`)
+- [ ] every unknown route returns a real 404 whose body is already in the
+      response — `curl -s <url> | grep "Page not found"`, not a browser check
 - [ ] `/ko/feed.xml` and `/en/feed.xml` each carry only their own language
 - [ ] `/sitemap.xml` lists both locales with correct alternates
 - [ ] Korean text wraps on word boundaries, not mid-word

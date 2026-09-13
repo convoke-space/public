@@ -62,49 +62,40 @@ happens once, on entry.
 A remembered preference could be layered on later without changing this
 contract.
 
-### Unknown locales and unknown paths
+### Unknown routes
 
-`app/[locale]/layout.tsx` keeps `dynamicParams = true` so an unsupported prefix
-such as `/fr` still reaches a page that can 404 properly. The layout itself must
-**not** call `notFound()`: a layout that throws is the one that would have
-contained the boundary, and Next then has nothing to render it in
-(`NoFallbackError`). It renders a document shell for the default locale instead,
-and the page below it 404s.
+Every unmatched route — an unknown path under a locale, an unsupported prefix
+like `/fr`, an unknown slug, or a bare `/nonexistent` — resolves to one place:
+`src/app/global-not-found.tsx`, enabled by `experimental.globalNotFound` in
+`next.config.ts`.
 
-Inside a valid locale, `app/[locale]/[...rest]/page.tsx` catches anything
-unmatched, and `dynamicParams = false` on each `[slug]` route turns an unknown
-slug into a 404 as well. Every one of those paths ends in the same boundary:
-`app/[locale]/not-found.tsx`.
+Next uses that file **as the layout** rather than nesting it inside one, so the
+404 is a single complete server-rendered document: real `<html>`, real 404
+status, its own stylesheet, `noindex`, and no hydration required. There is no
+catch-all route and no `not-found.tsx` anywhere in the tree.
 
-### What a not-found boundary can and cannot do
+`dynamicParams = false` on the `[locale]` segment and on every `[slug]` route is
+what routes an unknown locale or slug there.
 
-Three constraints were established empirically against Next 16, and the 404 is
-built around them. Do not "simplify" past them without re-testing:
+### Why the 404 is bilingual rather than locale-specific
 
-1. **A not-found boundary renders outside the root layout.** There is no
-   `<html lang>`, no header, no footer, and the layout's stylesheet is not
-   linked — including when there is only one root layout, so this is not a cost
-   of the gateway split.
-2. **A Client Component inside the boundary fails to render at all**
-   (`NoFallbackError`), so `usePathname()` is not available to detect the
-   locale.
-3. **No request header carries the path**, so a Server Component cannot derive
-   it either.
+It is one page showing Korean and English as equals, with a recovery link into
+each. It does not follow the route's locale, and that is a decision rather than
+a limitation.
 
-`src/lib/request-locale.ts` closes the gap: a `React.cache` store, which is
-request-scoped in the RSC runtime, lets the locale layout record the locale it
-matched and lets the 404 read it back. A `null` value means the prefix was not a
-supported locale, and the 404 falls back to offering both languages rather than
-guessing.
+Making the copy follow the route would mean getting the pathname into a document
+Next renders outside the normal routing tree. Every route to that information is
+a hack: a mutable per-request store written by one component and read by
+another, correctness depending on render order, or a client component that
+reintroduces the hydration dependency. An error surface is not worth any of
+them.
 
-The 404 therefore carries its own `lang` attribute and its own inline
-stylesheet. Those token values are the only duplicate of `src/app/globals.css`
-in the codebase, and the file says so.
+So the rule for this project is: **normal content is locale-specific, the error
+surface is not.** Correctness and simplicity win where a reader has already hit
+a dead end, and both languages get a usable way out.
 
-One residual limitation, worth knowing and not worth fighting: Next streams the
-not-found tree as flight data inside its own error document, so a 404 body is
-**client-rendered**. The status code is correct for crawlers, which is what a
-404 is judged on; the localized content is for humans.
+`<html lang>` is `ko`, the authoring language, because one value has to be
+chosen. Each language's block carries its own `lang`.
 
 ### Header placement
 
@@ -267,7 +258,16 @@ never as a link that would 404.
 | `i18n-dictionary.test.ts` | both dictionaries complete, and actually in their own language |
 | `sitemap-feed.test.ts` | bilingual sitemap, alternate targets, per-locale RSS |
 | `site.test.ts` | origin resolution across local, preview and production |
+| `global-not-found.test.tsx` | the 404 renders a complete document on the server, in both languages, with both recovery links |
 | `boundary.test.ts` | dependency-boundary checks on package.json and the lockfile, a credential-pattern guard, no submodules |
+
+`scripts/verify-http.mjs` runs the checks a unit test cannot: it starts the
+production server and asserts, on the raw response bytes, that every unmatched
+route returns a real 404 whose body already contains both languages and both
+recovery links, that real pages still return 200 with the right `<html lang>`,
+and that concurrent 404s return identical bodies. It runs in CI after the build,
+and it exists because the defect it replaced looked correct in a browser and was
+an empty document to `curl`. **Never verify a 404 with a browser alone.**
 
 Bilingual fixtures live in `tests/fixtures/`, covering a paired entry with
 differing slugs, a Hangul slug, `pending` and `standalone` editions, an

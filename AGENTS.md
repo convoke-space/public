@@ -198,6 +198,11 @@ content on disk, deployed on Vercel.
   hard-code `https://convoke.space`** anywhere else — import from `@/lib/site`.
 - **Never hard-code user-facing copy in a component.** It belongs in
   `src/lib/i18n.ts`, where TypeScript guarantees both locales define it.
+- **Never pass request state through a mutable store.** No `React.cache`
+  write-then-read between components, no module-level variable holding
+  something about the current request, no correctness that depends on render
+  order. If a value is hard to reach, change the design instead. (Ordinary
+  `React.cache` memoisation of a pure function is fine.)
 - Build every internal link with `localePath(locale, path)` so it stays inside
   the reader's language.
 - Colours, type scale and spacing come from the tokens in
@@ -236,6 +241,11 @@ content/events/en/     → /en/gatherings/<slug>
 - **Never generate a URL or an hreflang for an edition that does not exist.**
 - `draft: true` keeps an entry out of listings, routes, sitemap and feed. It is
   a staging tool, not a privacy mechanism — the file is still public.
+- **Normal content is locale-specific; the error surface is not.** Every
+  unmatched route resolves to one bilingual, server-rendered 404
+  (`src/app/global-not-found.tsx`). Do not make it follow the route's locale:
+  every way to do that reintroduces per-request state or a hydration
+  dependency, and an error page is not worth either.
 - Frontmatter is validated by `src/lib/schema.ts`. **Unknown fields fail the
   build.** To add a field: extend the schema, document it in
   `docs/PUBLISHING.md`, extend `tests/schema.test.ts`.
@@ -251,9 +261,15 @@ npm run lint        # eslint
 npm run typecheck   # next typegen && tsc --noEmit
 npm test            # vitest
 npm run build       # next build (production)
+npm run verify:http # raw HTTP against a real production server
 ```
 
-`npm run verify` runs all four in order.
+`npm run verify` runs all five in order.
+
+**A browser test is not proof that a page works.** Anything that renders only
+after hydration looks correct in Playwright and is an empty document to `curl`
+and to a crawler. Server-rendered output is checked on the raw response — that
+is what `verify:http` is for.
 
 Beyond the commands, a change is not done until:
 

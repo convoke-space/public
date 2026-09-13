@@ -2,7 +2,7 @@
   "name": "convoke-space",
   "version": "0.1.0",
   "private": true,
-  "description": "Source for convoke.space \u2014 a personal digital platform and public archive.",
+  "description": "Source for convoke.space — a personal digital platform and public archive.",
   "engines": {
     "node": ">=22"
   },
@@ -14,8 +14,9 @@
     "typecheck": "next typegen && tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "verify": "npm run lint && npm run typecheck && npm run test && npm run build",
-    "lint:fix": "eslint . --fix"
+    "verify": "npm run lint && npm run typecheck && npm run test && npm run build && npm run verify:http",
+    "lint:fix": "eslint . --fix",
+    "verify:http": "node scripts/verify-http.mjs"
   },
   "dependencies": {
     "gray-matter": "^4.0.3",

@@ -11,6 +11,12 @@ const nextConfig: NextConfig = {
   outputFileTracingIncludes: {
     "/**": ["./content/**/*"],
   },
+  experimental: {
+    // Serves src/app/global-not-found.tsx for every unmatched route. Next uses
+    // that file as the layout, so the 404 is one complete server-rendered
+    // document — see docs/ARCHITECTURE.md.
+    globalNotFound: true,
+  },
 };
 
 export default nextConfig;

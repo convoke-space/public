@@ -60,6 +60,13 @@ When in doubt, ship the architecture and leave the prose to the human.
 - **There are two root layouts** (`app/(gateway)/` and `app/[locale]/`). That is
   deliberate: it is the only way to get `<html lang>` right per route without a
   middleware redirect. Do not "consolidate" them.
+- **The 404 is one bilingual page**, `app/global-not-found.tsx`, behind
+  `experimental.globalNotFound`. It deliberately does not follow the route's
+  locale — see AGENTS.md §8. Do not add a `not-found.tsx`, a catch-all route, or
+  any per-request store to change that.
+- **Verify a 404 with `curl`, never with a browser alone.** A hydration-only
+  page looks fine in Playwright and is empty to a crawler. `npm run verify:http`
+  is the check that catches it.
 - **The header is rendered by each page, not by the layout**, so the language
   switcher can resolve an article's counterpart. Use `PageShell`.
 - **Never build an internal link by hand.** Use `localePath(locale, path)`, or

@@ -105,10 +105,10 @@ export type Dictionary = {
     sections: AboutSection[];
   };
   notFound: {
-    eyebrow: string;
     title: string;
     lede: string;
-    body: string;
+    /** Names its own language: the 404 shows both at once. */
+    home: string;
   };
   error: {
     eyebrow: string;
@@ -278,10 +278,9 @@ const ko: Dictionary = {
     ],
   },
   notFound: {
-    eyebrow: "404",
-    title: "이 페이지는 없습니다",
-    lede: "주소가 바뀌었거나, 애초에 공개된 적이 없는 글일 수 있습니다.",
-    body: "다음 중에서 찾아보세요:",
+    title: "페이지를 찾을 수 없습니다",
+    lede: "요청한 페이지가 존재하지 않거나 주소가 바뀌었을 수 있습니다.",
+    home: "한국어 홈으로",
   },
   error: {
     eyebrow: "오류",
@@ -455,10 +454,9 @@ const en: Dictionary = {
     ],
   },
   notFound: {
-    eyebrow: "404",
-    title: "This page isn’t here",
-    lede: "The address may have changed, or the piece may never have been published.",
-    body: "Try one of these:",
+    title: "Page not found",
+    lede: "The page may have moved, or it may never have existed.",
+    home: "Go to the English home page",
   },
   error: {
     eyebrow: "Error",

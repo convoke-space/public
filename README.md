@@ -13,7 +13,7 @@ English as equals.
 ```bash
 npm ci
 npm run dev      # http://localhost:3000
-npm run verify   # lint + typecheck + test + build — the gate for every change
+npm run verify   # lint + typecheck + test + build + raw HTTP checks
 ```
 
 Node 22 or newer.
@@ -38,6 +38,7 @@ src/app/
 src/components/  presentational building blocks
 src/lib/         content loader, schema, i18n dictionary, alternates, SEO
 tests/           vitest — schema, content, routing, dictionary, sitemap, 404, boundary
+scripts/         verify-http.mjs — raw HTTP checks against a real server
 docs/            architecture, operations, publishing, deployment, collaboration
 ```
 

@@ -48,3 +48,11 @@ jobs:
         run: npm run build
         env:
           NEXT_TELEMETRY_DISABLED: "1"
+
+      # Raw HTTP against the build that just completed. A browser test is not
+      # enough here: a page that renders only after hydration looks correct in
+      # one and is an empty document to a crawler.
+      - name: Verify HTTP responses
+        run: npm run verify:http
+        env:
+          NEXT_TELEMETRY_DISABLED: "1"
