@@ -1,0 +1,104 @@
+---
+title: GitHub as the memory layer for AI agents
+description: Two coding agents from different vendors cannot share context. The repository can — if you write down the things a conversation would otherwise be holding.
+date: "2026-09-13"
+tags: ["ai-native", "architecture", "collaboration"]
+---
+
+This site is maintained by more than one AI coding agent. Not simultaneously,
+and not by design of some grand orchestration layer — simply because the person
+directing it uses whichever assistant is at hand, from whichever device is at
+hand, and those assistants come from different vendors and share nothing.
+
+That constraint is more interesting than it first looks. Two agents from
+different providers have no common memory, no shared conversation history, and
+no way to ask each other what was decided last week. Whatever they need to know
+has to be somewhere both can read.
+
+There is exactly one such place: the repository.
+
+## The failure mode this avoids
+
+The default failure mode of conversational development is that the *reasoning*
+lives in the conversation and only the *result* lands in the repository. A month
+later the code says what was built and nothing says why. Ask a fresh session to
+extend it and you get a plausible change that quietly violates a constraint
+nobody wrote down.
+
+With a single long-running assistant you can paper over this, because the
+context window and the memory feature carry some of the load. With two
+independent agents you cannot paper over anything. The gap shows up immediately,
+on the second session.
+
+Which makes it a useful forcing function. If the repository is sufficient for a
+cold agent, it is also sufficient for you in eighteen months.
+
+## What has to be written down
+
+Not everything. Writing down every decision produces documentation sprawl, which
+is its own failure — a fresh agent that has to read forty files before touching
+one is not better off.
+
+The test is narrower: **would a competent agent, given only this repository,
+plausibly do the wrong thing?** If yes, write it down. If no, let the code speak.
+
+For this project that turned out to be a short list:
+
+- The canonical repository names and what each is for.
+- The rule that production must build from the public repository alone.
+- The publication flow, and the fact that promotion includes sanitization.
+- Which validation commands constitute "done".
+- Branch ownership, so two agents never edit the same branch.
+- The security rules, stated as prohibitions rather than principles.
+
+That lives in `AGENTS.md` at the root of each repository — one shared
+constitution per repository, readable by anything. Vendor-specific files stay
+thin and defer to it, because the moment the same rule is stated in two places
+it starts drifting, and a fresh agent has no way to tell which copy is current.
+
+## Issues and pull requests are the working memory
+
+Documentation covers the durable decisions. The in-flight state — what is being
+worked on, what was rejected, what a review found — belongs in the parts of
+GitHub that already exist for it.
+
+A pull request description that explains the reasoning is not a formality; for a
+cross-agent project it is the handoff. A review comment that says "this violates
+the boundary invariant, see AGENTS.md" is how one agent corrects another without
+either of them being in the same conversation. An issue is how work survives a
+session ending mid-task.
+
+This is not novel. It is how distributed human teams have always worked. The
+observation is only that agents need it *more*, because their amnesia is total
+and immediate rather than gradual.
+
+## Implementer and reviewer should not be the same agent
+
+The other thing that changes with two agents is that independent review becomes
+available for free.
+
+An agent reviewing its own work has a strong prior that the work is correct — it
+wrote it, it remembers the reasoning, and the failure modes it checks for are
+the ones it was already thinking about. A different agent, reading only the diff
+and the documentation, brings none of that. It reads what is actually there.
+
+So the flow is: one agent implements on its own branch, opens a pull request,
+and a different agent reviews it against requirements, correctness, the
+boundary rules, accessibility, and security. Remediation goes back to the
+implementer. Only then does it reach a human.
+
+With one caveat, which is worth stating plainly: two language models agreeing
+with each other is not a security control. Cross-review catches oversights and
+regressions well. It does not substitute for a human deciding whether the change
+should exist. On this project, merges to `main` stay human.
+
+## The test for whether it works
+
+There is a simple way to check whether a repository is genuinely agent-legible:
+open a fresh session with no context, point it at the repository, and ask it to
+make a small change end-to-end.
+
+If it reads the constitution, picks the right branch name, respects the
+boundary, runs the documented validation, and opens a pull request that explains
+itself — the memory layer is working. If it asks you to re-explain the project,
+it is not, and the fix is not a better prompt. The fix is a commit.
