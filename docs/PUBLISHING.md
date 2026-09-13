@@ -27,7 +27,6 @@ field: extend the schema, document it here, extend `tests/schema.test.ts`.
 | `date` | yes | `YYYY-MM-DD` or ISO datetime | quote it, so YAML does not coerce it |
 | `updated` | no | date | shown on the page when present |
 | `tags` | no | string[] | lowercased and de-duplicated automatically |
-| `featured` | no | boolean | reserved for future curation |
 | `draft` | no | boolean | excluded from listings, routes, sitemap and feed |
 
 `draft: true` is a staging tool, **not** a privacy mechanism. The file is still

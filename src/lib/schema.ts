@@ -30,7 +30,6 @@ type BaseFrontmatter = {
   date: string;
   updated?: string;
   tags?: string[];
-  featured?: boolean;
   draft?: boolean;
 };
 
@@ -194,7 +193,6 @@ const BASE_FIELDS = [
   "date",
   "updated",
   "tags",
-  "featured",
   "draft",
 ] as const;
 
@@ -205,7 +203,6 @@ function parseBase(c: Collector): BaseFrontmatter {
     date: c.requiredDate("date"),
     updated: c.optionalDate("updated"),
     tags: c.optionalTags("tags"),
-    featured: c.optionalBoolean("featured"),
     draft: c.optionalBoolean("draft"),
   };
 }

@@ -157,23 +157,6 @@ export function lastModified(entry: Entry): Date {
   return new Date(entry.frontmatter.updated ?? entry.frontmatter.date);
 }
 
-export function allPublishedEntries(): Entry[] {
-  return COLLECTIONS.flatMap((c) => published(c));
-}
-
-/** Tag index across a collection, ordered by frequency then alphabetically. */
-export function tagCounts(entries: Entry[]): { tag: string; count: number }[] {
-  const counts = new Map<string, number>();
-  for (const entry of entries) {
-    for (const tag of entry.frontmatter.tags ?? []) {
-      counts.set(tag, (counts.get(tag) ?? 0) + 1);
-    }
-  }
-  return [...counts.entries()]
-    .map(([tag, count]) => ({ tag, count }))
-    .sort((a, b) => b.count - a.count || a.tag.localeCompare(b.tag));
-}
-
 /** Rough reading time, used as a reader affordance only. */
 export function readingTimeMinutes(body: string): number {
   const words = body.trim().split(/\s+/).length;

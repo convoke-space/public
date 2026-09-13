@@ -18,7 +18,6 @@ export default function GatheringsIndexPage() {
   return (
     <Container width="page">
       <PageHeader
-        eyebrow="Gatherings"
         title="Gatherings"
         lede="Small, deliberately sized sessions. Registration, when it is open, is handled off-site — no attendee data is kept here."
       />

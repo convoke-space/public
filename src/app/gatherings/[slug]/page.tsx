@@ -4,7 +4,7 @@ import { Container } from "@/components/container";
 import { JsonLd } from "@/components/json-ld";
 import { Mdx } from "@/components/mdx";
 import { getEntry, getEvents, isUpcoming } from "@/lib/content";
-import { formatEventWhen } from "@/lib/format";
+import { formatEventWhen, isoDateTime } from "@/lib/format";
 import { breadcrumbJsonLd, eventJsonLd, pageMetadata } from "@/lib/seo";
 import type { EventFrontmatter } from "@/lib/schema";
 
@@ -91,7 +91,7 @@ export default async function GatheringPage({
           <dl className="mt-6 grid grid-cols-[auto_1fr] gap-x-5 gap-y-1.5 text-[0.85rem]">
             <dt className="eyebrow self-center">When</dt>
             <dd className="text-muted">
-              <time dateTime={new Date(fm.date).toISOString()}>
+              <time dateTime={isoDateTime(fm.date)}>
                 {formatEventWhen(fm.date, fm.end)}
               </time>
             </dd>

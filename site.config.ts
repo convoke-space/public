@@ -37,8 +37,6 @@ export const siteConfig = {
     { href: "/gatherings", label: "Gatherings", requiresContent: "events" },
     { href: "/about", label: "About" },
   ] satisfies NavItem[],
-  /** Optional external profiles. Empty entries are simply not rendered. */
-  links: [] as { href: string; label: string }[],
 } as const;
 
 export type SiteConfig = typeof siteConfig;

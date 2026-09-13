@@ -11,12 +11,6 @@ const dateFormatter = new Intl.DateTimeFormat(siteConfig.locale, {
   timeZone: "UTC",
 });
 
-const monthFormatter = new Intl.DateTimeFormat(siteConfig.locale, {
-  year: "numeric",
-  month: "short",
-  timeZone: "UTC",
-});
-
 const dateTimeFormatter = new Intl.DateTimeFormat(siteConfig.locale, {
   year: "numeric",
   month: "long",
@@ -29,10 +23,6 @@ const dateTimeFormatter = new Intl.DateTimeFormat(siteConfig.locale, {
 
 export function formatDate(value: string): string {
   return dateFormatter.format(new Date(value));
-}
-
-export function formatMonth(value: string): string {
-  return monthFormatter.format(new Date(value));
 }
 
 /** Includes a time only when the source value actually carried one. */
@@ -60,11 +50,4 @@ export function isoDateTime(value: string): string {
   return /^\d{4}-\d{2}-\d{2}$/.test(value)
     ? value
     : new Date(value).toISOString();
-}
-
-export function formatList(items: string[]): string {
-  return new Intl.ListFormat(siteConfig.locale, {
-    style: "long",
-    type: "conjunction",
-  }).format(items);
 }

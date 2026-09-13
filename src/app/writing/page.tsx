@@ -17,13 +17,13 @@ export default function WritingIndexPage() {
   return (
     <Container width="page">
       <PageHeader
-        eyebrow="Writing"
         title="Writing"
         lede="Longer pieces, worked through rather than posted quickly. Ordered newest first."
       />
 
       <div className="pb-16">
         <EntryList
+          headingLevel="h2"
           items={posts.map((post) => ({
             href: `/writing/${post.slug}`,
             title: post.frontmatter.title,

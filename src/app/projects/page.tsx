@@ -17,13 +17,13 @@ export default function ProjectsIndexPage() {
   return (
     <Container width="page">
       <PageHeader
-        eyebrow="Projects"
         title="Projects"
         lede="Work in progress and work that has settled. Grouped by how alive each one currently is."
       />
 
       <div className="pb-16">
         <EntryList
+          headingLevel="h2"
           items={projects.map((project) => ({
             href: `/projects/${project.slug}`,
             title: project.frontmatter.title,

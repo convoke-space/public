@@ -1,4 +1,4 @@
-import { getPosts, readingTimeMinutes } from "@/lib/content";
+import { getPosts } from "@/lib/content";
 import { canonicalUrl, siteConfig } from "@/lib/site";
 
 export const dynamic = "force-static";
@@ -29,7 +29,6 @@ export function GET(): Response {
         ...(post.frontmatter.tags ?? []).map(
           (tag) => `      <category>${escapeXml(tag)}</category>`,
         ),
-        `      <!-- ${readingTimeMinutes(post.body)} min read -->`,
         "    </item>",
       ].join("\n");
     })

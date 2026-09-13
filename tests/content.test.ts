@@ -11,7 +11,6 @@ import {
   readCollection,
   readingTimeMinutes,
   splitEvents,
-  tagCounts,
   type EventEntry,
 } from "@/lib/content";
 import { SLUG_PATTERN } from "@/lib/schema";
@@ -136,18 +135,6 @@ describe("events", () => {
 });
 
 describe("helpers", () => {
-  it("counts tags by frequency then alphabetically", () => {
-    const counts = tagCounts(getPosts());
-    for (let i = 1; i < counts.length; i += 1) {
-      const prev = counts[i - 1]!;
-      const current = counts[i]!;
-      expect(
-        prev.count > current.count ||
-          (prev.count === current.count && prev.tag < current.tag),
-      ).toBe(true);
-    }
-  });
-
   it("never reports a reading time below one minute", () => {
     expect(readingTimeMinutes("")).toBe(1);
     expect(readingTimeMinutes("word ".repeat(440))).toBe(2);

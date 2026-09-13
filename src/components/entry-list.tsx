@@ -18,10 +18,15 @@ export type EntryListItem = {
 export function EntryList({
   items,
   emptyMessage = "Nothing here yet.",
+  headingLevel = "h3",
 }: {
   items: EntryListItem[];
   emptyMessage?: string;
+  /** Must follow the heading above the list so levels are never skipped. */
+  headingLevel?: "h2" | "h3";
 }) {
+  const Heading = headingLevel;
+
   if (items.length === 0) {
     return <p className="text-muted">{emptyMessage}</p>;
   }
@@ -32,14 +37,14 @@ export function EntryList({
         <li key={item.href} className="group py-6 sm:py-7">
           <article>
             <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-              <h3 className="font-serif text-[1.15rem] leading-snug">
+              <Heading className="font-serif text-[1.15rem] leading-snug">
                 <Link
                   href={item.href}
                   className="underline decoration-transparent decoration-1 underline-offset-[0.22em] transition-[text-decoration-color] group-hover:decoration-accent"
                 >
                   {item.title}
                 </Link>
-              </h3>
+              </Heading>
               {item.badge ? (
                 <span className="eyebrow shrink-0">{item.badge}</span>
               ) : null}

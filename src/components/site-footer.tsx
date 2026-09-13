@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Container } from "./container";
-import { siteConfig } from "../../site.config";
+import { siteConfig } from "@/lib/site";
 
 export function SiteFooter({ hasEvents }: { hasEvents: boolean }) {
   const year = new Date().getUTCFullYear();

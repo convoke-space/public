@@ -33,7 +33,7 @@
   --surface: #ffffff;
   --ink: #1a1917;
   --muted: #5c5952;
-  --faint: #8b877e;
+  --faint: #767268;
   --rule: #e5e1d8;
   --accent: #96351b;
   --accent-soft: #f2e7e1;
@@ -56,7 +56,7 @@
     --surface: #191816;
     --ink: #ecebe6;
     --muted: #a5a199;
-    --faint: #7d7a72;
+    --faint: #87847c;
     --rule: #2b2925;
     --accent: #e79a76;
     --accent-soft: #2a201b;
@@ -276,7 +276,10 @@
   border-collapse: collapse;
   font-family: var(--font-sans);
   font-size: 0.95rem;
-  display: block;
+}
+
+/* Wide tables scroll inside their own container; see src/components/mdx.tsx. */
+.prose .table-scroll {
   overflow-x: auto;
 }
 

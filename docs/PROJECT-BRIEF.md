@@ -135,6 +135,7 @@ Recorded so nobody re-litigates them by accident:
 - **No analytics** — nothing about readers is collected.
 - **No schema-validation library** — the frontmatter validator is ~200 lines of
   dependency-free, tested code.
-- **No `cover` image field** — social cards are generated from titles instead.
+- **No `cover` image field, and no `featured` flag** — social cards are
+  generated from titles, and no page curates by hand yet.
 - **No personal biography on the About page** — the platform describes itself;
   the byline is the owner's to write.
