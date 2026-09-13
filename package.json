@@ -2,9 +2,9 @@
   "name": "convoke-space",
   "version": "0.1.0",
   "private": true,
-  "description": "Source for convoke.space — a personal digital platform and public archive.",
+  "description": "Source for convoke.space \u2014 a personal digital platform and public archive.",
   "engines": {
-    "node": ">=20.9.0"
+    "node": ">=22"
   },
   "scripts": {
     "dev": "next dev",
