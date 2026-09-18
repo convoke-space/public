@@ -20,10 +20,11 @@ There is exactly one such place: GitHub.
 | Structural decisions | `docs/ARCHITECTURE.md` |
 | Process | `docs/OPERATIONS.md`, `docs/PUBLISHING.md`, `docs/DEPLOYMENT.md` |
 | Why this project exists | `docs/PROJECT-BRIEF.md` |
-| Reasoning behind one change | the pull request body |
+| Reasoning behind one system change | the pull request body |
+| Confirmed content publication | the exact public/main content commit plus private publication trace |
 | Work not yet started or half-finished | a GitHub issue |
-| Disagreement and correction | review comments on the pull request |
-| Whether it works | CI results |
+| Disagreement and correction on system work | review comments on the pull request |
+| Whether it works | validation / CI / production result |
 
 Nothing important lives in a conversation, an agent's memory feature, or a
 cloud session's scratch state. All three vanish.
@@ -45,9 +46,11 @@ One task, one owner, one branch. Two agents must never edit the same branch.
 ```
 claude/<task>
 codex/<task>
-content/<slug>
 fix/<task>
 ```
+
+An explicitly authorized content-only publication does not create a task branch;
+it uses the narrow validated direct-main path in `AGENTS.md` §10.
 
 An agent that finds an existing branch or open pull request for a task does not
 take it over. It comments, or picks up something else.
