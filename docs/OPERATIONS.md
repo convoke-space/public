@@ -3,17 +3,30 @@
 Day-to-day running of Convoke, from a phone or a browser, without a local
 development machine.
 
-## The normal loop
+## The normal loops
 
-1. The human describes what they want, in conversation, to whichever agent is
-   at hand.
-2. The agent opens a cloud session against `convoke-space/public`, reads
-   `AGENTS.md`, and works on a task branch.
-3. The agent runs `npm run verify` and opens a pull request explaining the
-   reasoning.
-4. CI runs the same four checks. A second agent may review independently.
-5. The human reads the pull request and merges.
-6. Vercel deploys `main` to `https://convoke.space`.
+### Content publication
+
+1. The human explicitly authorizes an exact reviewed piece in conversation.
+2. The publishing-capable session reads current public/main and this repository's
+   current publishing rules.
+3. It applies only the intended content files to a clean current-main snapshot.
+4. It runs `npm run verify` on those exact bytes.
+5. It confirms main has not advanced, then commits only those content files
+   directly to public/main, non-force.
+6. GitHub CI and Vercel run from main. The session confirms the resulting commit
+   and production URL when those signals are available.
+
+No content PR or second merge approval is part of this normal path.
+
+### System changes
+
+Code, dependencies, configuration, schema, shared UI copy, repository docs, CI,
+deployment rules and architecture still use:
+
+```text
+branch → PR → independent review → human merge → Vercel
+```
 
 No step requires a specific machine. If a change ever depends on one, that is a
 bug in the process.
@@ -35,9 +48,10 @@ platform differences.
 
 ## Adding content
 
-See `docs/PUBLISHING.md`. Short version: a file in
-`content/<collection>/<locale>/`, a branch named `content/<slug>`, a pull
-request.
+See `docs/PUBLISHING.md`. Short version: after explicit human publication
+authorization, validate the exact content-only change against current main and
+commit it directly to main. If anything outside `content/**` must change, use
+the system-change PR path.
 
 ### Per-publication checklist
 
@@ -74,8 +88,10 @@ Beyond `npm run verify`, check in **both** languages:
    never stores attendee data.
 2. Add `content/events/<slug>.mdx` with `location`, `format` and
    `registrationUrl`.
-3. Merge. The Gatherings link appears in navigation automatically once the
-   collection is non-empty, and disappears again if it is emptied.
+3. After explicit human publication authorization, run the normal validated
+   content-only direct-main publication flow. The Gatherings link appears in
+   navigation automatically once the collection is non-empty, and disappears
+   again if it is emptied.
 
 ## Dependency maintenance
 
@@ -96,11 +112,13 @@ before bumping.
 build log. Roll back to the previous successful deployment from the dashboard,
 then fix forward.
 
-**A build fails on `main`.** It will fail the same way locally and in CI. Fix on
-a branch and merge; do not push directly to `main`.
+**A build fails on `main`.** System repairs use a branch and PR. A direct content
+publication should already have passed `npm run verify` before main was updated;
+if production content itself must be removed urgently, revert only the offending
+content commit and then investigate the underlying failure.
 
-**Something was published that should not have been.** Revert the content
-commit, merge, and confirm the page 404s and the sitemap and feed no longer list
+**Something was published that should not have been.** Revert the content-only
+commit directly, confirm the page 404s and the sitemap and feed no longer list
 it. Note that the text remains in git history and may already be cached or
 indexed — if the material is genuinely sensitive, treat it as disclosed and act
 accordingly rather than assuming the revert undid it.
