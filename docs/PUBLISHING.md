@@ -13,11 +13,10 @@ Korean idea / notes / draft        (convoke-space/private)
   → publishable Korean edition
   → English editorial adaptation
   → fact / privacy / tone / human-voice verification
-  → convoke-space/public
-  → pull request
-  → cross-agent review
-  → human approval
-  → publish
+  → explicit human publication command
+  → validated content-only package
+  → convoke-space/public@main
+  → Vercel production
 ```
 
 Three properties of that pipeline are load-bearing:
@@ -30,8 +29,9 @@ Three properties of that pipeline are load-bearing:
 2. **The human is the author.** An agent edits, researches, adapts and argues
    back. It never invents the operator's experience, opinions, clients or
    credentials. See `AGENTS.md` §5.
-3. **Publication is explicit.** Nothing moves from the private repository to
-   the public one automatically.
+3. **Publication is explicit.** Nothing moves from the private repository merely
+   because a draft is ready. The human's explicit publication command is the
+   final authorization for the exact reviewed content candidate.
 
 ## Where content lives
 
@@ -193,13 +193,29 @@ file moves, actively inspect it for:
 - unsupported claims
 - attribution problems — quotes, sources, other people's ideas
 
-Then rewrite for a reader rather than for the author's own thinking, add
-frontmatter, and open the pull request. Use the "Publication" issue template;
-do not paste private content into the issue.
+Then rewrite for a reader rather than for the author's own thinking and add
+frontmatter. Substantive prose changes must happen before the final independent
+review in the private Content OS. Public-side packaging may not quietly improve,
+strengthen or reinterpret the reviewed article.
 
-The private repository is never a live CMS. Nothing publishes automatically.
+After the human explicitly says to publish the exact reviewed candidate:
 
-## Checklist before opening a content pull request
+1. start from current public/main;
+2. apply only the intended content file(s);
+3. run the full `npm run verify` on those exact bytes;
+4. confirm public/main has not advanced since that validated snapshot;
+5. commit only those content paths directly to public/main, non-force;
+6. fetch the resulting main commit and confirm the exact blob hashes;
+7. observe CI/deployment and verify the production URL when available.
+
+If any code, schema, dependency, config, shared UI copy, CI or documentation
+change is required, this direct-content path does not apply. Use the normal
+system-change PR/review/human-merge workflow instead.
+
+The private repository is never a live CMS. Publication begins only after the
+human's explicit content publication command.
+
+## Checklist before direct content publication
 
 - [ ] Filenames are lowercase kebab-case and read well as URLs in both languages
 - [ ] `translationKey` matches across the pair
