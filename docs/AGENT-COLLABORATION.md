@@ -113,20 +113,25 @@ more rigorous.
 
 ## The human gate
 
-`main` is production. During the early operating period a human merges every
-meaningful change.
+`main` is production. For system changes, a human still merges every meaningful
+PR.
+
+For an exact content candidate that already passed independent private review,
+the human's explicit publication command is the final publication gate. Public-side
+packaging may then validate and commit only the content files directly to main;
+there is no second merge ceremony.
 
 **Two language models agreeing with each other is not a security control.** The
-cross-review catches oversights and regressions. It does not decide whether a
-change should exist, or whether something should be said publicly. That is the
-human's call.
+independent review catches oversights and regressions. It does not decide whether
+something should be said publicly. That decision remains the human's.
 
 ## Test for whether this is working
 
 Open a fresh session with no context, point it at the repository, and ask for a
-small end-to-end change. It should read `AGENTS.md`, pick a correctly named
-branch, respect the boundary, run `npm run verify`, and open a pull request
-that explains itself.
+small system change. It should read `AGENTS.md`, pick a correctly named branch,
+respect the boundary, run `npm run verify`, and open a pull request that
+explains itself. A separately authorized content-only publication should instead
+run the exact-content validation and direct-main flow without inventing a PR.
 
 If it asks you to re-explain the project, the fix is not a better prompt. The
 fix is a commit.
