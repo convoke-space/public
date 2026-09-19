@@ -396,6 +396,10 @@ reserved for exceptional investigation, not duplicated on every PR.
   mobile and desktop behavior rather than reasoning from one screenshot or one route.
 - Codex Code Review is the independent reviewer, not the implementer. It does not
   remediate, push implementation commits, or merge the PR.
+- After the implementation owner pushes a substantive remediation for Codex findings,
+  that implementation owner must post `@codex review` on the same pull request and
+  wait for the fresh-head review result. The operator should not have to trigger routine
+  re-review manually.
 - Human merge remains required for system/code/config/schema/shared-copy/docs/CI/
   deployment changes.
 
