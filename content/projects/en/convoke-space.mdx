@@ -15,8 +15,10 @@ a record of what the repository actually contains today.
 
 - **Next.js App Router**, TypeScript, Tailwind CSS. Content is MDX on disk,
   generated statically at build time.
-- **No database, no authentication, no CMS.** Content is files in Git, and
-  adding a piece is one pull request.
+- **No database, no authentication, no CMS.** Content is files in Git. An
+  independently reviewed piece with explicit human publication approval can be
+  validated against current `main` and published directly; system changes still
+  use pull requests.
 - **No web fonts and no client-side analytics.** Typography uses only faces the
   reader's operating system already has.
 - **A hand-written frontmatter validator.** Around three hundred
@@ -43,9 +45,12 @@ everything published; `convoke-space/private` holds drafts and working
 material. Production builds from the public repository alone — no
 cross-repository clone, no build token, no runtime fetch.
 
-Changes happen on task branches owned by exactly one person or agent at a time,
-arrive as pull requests, pass lint, typecheck, tests and a production build,
-and are merged by a human.
+System changes happen on task branches owned by exactly one person or agent at
+a time, arrive as pull requests, pass validation and independent review, and are
+merged by a human. Content-only publication is narrower: once an exact candidate
+has already passed independent review in the private Content OS and the human
+explicitly authorizes publication, it can be validated against current `main`
+and committed directly without a separate content pull request.
 
 ## Status
 
