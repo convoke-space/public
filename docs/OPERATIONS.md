@@ -114,13 +114,16 @@ then fix forward.
 
 **A build fails on `main`.** System repairs use a branch and PR. A direct content
 publication should already have passed `npm run verify` before main was updated;
-if production content itself must be removed urgently, revert only the offending
-content commit and then investigate the underlying failure.
+if production content itself must be removed urgently, prepare the smallest
+content-only revert on an isolated branch and use the normal PR → independent
+review → human merge path, then investigate the underlying failure.
 
-**Something was published that should not have been.** Revert the content-only
-commit directly, confirm the page 404s and the sitemap and feed no longer list
-it. Note that the text remains in git history and may already be cached or
-indexed — if the material is genuinely sensitive, treat it as disclosed and act
+**Something was published that should not have been.** Prepare a focused revert
+of only the offending content on an isolated branch, run the required
+verification, and use the normal PR → independent review → human merge path.
+After merge, confirm the page 404s and the sitemap and feed no longer list it.
+Note that the text remains in git history and may already be cached or indexed —
+if the material is genuinely sensitive, treat it as disclosed and act
 accordingly rather than assuming the revert undid it.
 
 **A credential was committed.** Rotate it immediately. Deleting the file is not
