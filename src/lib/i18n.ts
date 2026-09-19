@@ -247,7 +247,7 @@ const ko: Dictionary = {
         heading: "어떻게 운영하나",
         paragraphs: [
           [
-            "방향과 판단은 사람이 정하고, 구현은 클라우드에서 도는 AI 코딩 에이전트가 GitHub를 상대로 수행합니다. 모든 변경은 Pull Request로 올라오고, 자동 검증을 통과한 뒤 사람이 읽고 병합합니다. 상주하는 개발용 컴퓨터는 이 과정에 없습니다. 저장소가 지속되는 상태이고, 에이전트는 일회용입니다.",
+            "방향과 판단은 사람이 정하고, 구현은 클라우드에서 도는 AI 코딩 에이전트가 GitHub를 상대로 수행합니다. 코드·설정·문서 같은 시스템 변경은 작업 브랜치와 Pull Request를 거쳐 자동 검증과 독립 검토 뒤 사람이 병합합니다. 비공개 Content OS에서 독립 검토를 마치고 사람이 명시적으로 발행을 승인한 콘텐츠만 현재 public/main을 기준으로 검증한 뒤 별도 콘텐츠 PR 없이 main에 직접 반영할 수 있습니다. 상주하는 개발용 컴퓨터는 이 과정에 없습니다. 저장소가 지속되는 상태이고, 에이전트는 일회용입니다.",
           ],
           [
             "AI는 저자가 아닙니다. 편집자이자 조사자, 번역자이며, 필요할 때는 반론을 제기하는 역할입니다. 무엇을 주장할지, 무엇이 사실인지, 어떤 경험을 말할지는 사람이 정합니다.",
@@ -423,7 +423,7 @@ const en: Dictionary = {
         heading: "How it is operated",
         paragraphs: [
           [
-            "Direction and judgement are set by a person; implementation is carried out by cloud coding agents working against GitHub. Every change arrives as a pull request, passes automated validation, and is merged only after a human reads it. There is no permanent development machine in the loop — the repository is the durable state, and the agents are disposable.",
+            "Direction and judgement are set by a person; implementation is carried out by cloud coding agents working against GitHub. System changes such as code, configuration and repository documentation go through a task branch and pull request, automated validation, independent review, and a human merge. Only content that has already passed independent review in the private Content OS and received explicit human publication approval may be validated against current public/main and committed directly to main without a separate content pull request. There is no permanent development machine in the loop — the repository is the durable state, and the agents are disposable.",
           ],
           [
             "The AI is not the author. It edits, researches, translates, and argues back when that is useful. What is claimed, what is true, and which experience gets told stay with the person writing.",
