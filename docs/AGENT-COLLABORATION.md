@@ -71,48 +71,20 @@ already thinking about, which is exactly the set that does not need checking.
 
 ## Review standard
 
-Cover, at minimum: requirement coverage, regressions, runtime correctness,
-build correctness, broken links, type safety, responsive behaviour,
-accessibility, SEO, performance, dependency risk, security, privacy leakage,
-public/private boundary violations, unnecessary complexity, maintainability.
+Repository-wide Codex GitHub review instructions are canonical in
+`AGENTS.md ## Code Review Rules`.
 
-### Reviewing content and reader-facing copy
+This collaboration guide does not duplicate the review checklist, content-review
+criteria, or severity definitions. Reviewers should read the current root
+`AGENTS.md` and apply those rules to the actual PR diff.
 
-A meaningful content change is reviewed on more than its mechanics. The
-reviewing agent must also read the prose and check:
+The collaboration contract here is narrower:
 
-- **Bilingual consistency.** Do the two editions make the same central claim,
-  state the same facts and numbers, describe the same experience, and reach the
-  same judgement? Divergence is a content bug, not an editorial liberty.
-- **Adaptation quality.** Does the English edition read as English, or as
-  translated Korean? Does the Korean edition read as Korean, or as translated
-  English?
-- **Human voice.** Does this sound like the operator, or like generic AI prose?
-  Cliché openings, "not X but Y" pile-ups, repetitive summaries, motivational
-  conclusions, LinkedIn-register exaggeration — all P1, because they are the
-  failure mode this project is explicitly trying to avoid.
-- **Invented substance.** Is any experience, opinion, client, credential or
-  adoption claim unattributable to the operator? That is **P0**: it puts words
-  in a real person's mouth under their own name.
-- **Locale integrity.** Correct `<html lang>`, canonical, `hreflang`, feed and
-  switcher target — and no link that drops the reader into the other language by
-  accident.
-
-An agent reviewing its own prose is the weakest case of self-review there is:
-it will find its own phrasing natural. Cross-agent review matters most here.
-
-Severity:
-
-| Level | Meaning |
-| --- | --- |
-| **P0** | Critical production, security, privacy or data issue |
-| **P1** | Must fix before merge |
-| **P2** | Important; the merge decision needs a human |
-| **P3** | Optional improvement |
-
-Do not manufacture a long tail of P3 comments to appear thorough. Say plainly
-when something is right — a review that only lists problems is less useful, not
-more rigorous.
+- implementation and independent review remain separate roles;
+- the reviewer inspects the implementation rather than accepting its summary;
+- remediation belongs to the implementation owner, not the reviewer;
+- GitHub is the durable place for review findings and correction;
+- system changes still end at the human merge gate.
 
 ## The human gate
 

@@ -337,6 +337,72 @@ case. If any condition above fails, stop and use the system-change PR path.
 `main` is production. Direct content publication is therefore intentionally
 narrow and must be fully validated before the commit.
 
+## Code Review Rules
+
+These are the repository-wide rules for Codex Code Review on GitHub.
+
+For system changes, GitHub Codex Code Review is the normal independent review
+surface. When automatic review is enabled for this repository, an ordinary pull
+request should not require a second manual Codex Cloud review. Use `@codex review`
+for a rerun or a focused extra pass when needed. A separate deep Cloud review is
+reserved for exceptional investigation, not duplicated on every PR.
+
+### High-impact public-repository invariants
+
+- **Public/private boundary:** flag any change that introduces a build-time or
+  runtime dependency on `convoke-space/private`, copies private drafts/research
+  into this repository, weakens boundary tests, or risks exposing credentials,
+  personal data, attendee/customer data, employer/client confidential material,
+  or unpublished commercial information.
+- **Production correctness:** flag realistic regressions that can break the
+  production build, deployment, routing, server rendering, raw HTTP output,
+  sitemap/feed generation, metadata, or canonical URL behavior.
+- **Request-state safety:** flag mutable request state, render-order dependency,
+  or cross-request leakage, including module-level request data or unsafe
+  write-then-read caching patterns.
+- **Locale integrity:** flag changes that can send readers to the wrong locale,
+  emit the wrong `<html lang>`, create broken or invented hreflang/canonical
+  relationships, expose a language-switch target for a missing edition, or
+  hard-code locale-sensitive links outside the established helpers.
+- **Bilingual content integrity:** when content or reader-facing copy changes,
+  flag divergence in central claim, facts, numbers, described experience, or
+  judgement between Korean and English editions. Also flag invented experience,
+  opinions, clients, credentials, adoption claims, or an invented author identity.
+- **Schema and publishing contract:** flag changes that bypass frontmatter
+  validation, weaken translation pairing, publish draft-only material, or expand
+  the narrow content-only direct-publication exception into code, config, schema,
+  dependency, shared UI copy, documentation, CI, or deployment changes.
+- **Accessibility and SEO:** flag concrete regressions in semantic structure,
+  keyboard/accessibility behavior, responsive use, metadata, crawlability,
+  noindex/canonical behavior on previews, sitemap, RSS, or raw server-rendered
+  output.
+- **Dependency and architecture discipline:** flag unnecessary dependencies,
+  infrastructure added without a real requirement, third-party scripts/trackers,
+  web fonts, or changes that violate the deliberately small Next.js architecture.
+- **Security and privacy:** flag realistic credential exposure, unsafe environment
+  handling, sensitive information entering tracked files, or any change that
+  weakens existing public-repository security guards.
+
+### Review discipline
+
+- Review the actual PR diff and relevant current repository state, not only the
+  PR description or implementer's explanation.
+- Prefer concrete, reproducible findings with a realistic execution path and
+  material impact. Do not manufacture speculative edge cases or cosmetic comments
+  to appear thorough.
+- Do not duplicate mechanical CI output as review noise unless the PR weakens,
+  bypasses, or invalidates those checks.
+- Where UI or reader-visible behavior changes, inspect both locales and consider
+  mobile and desktop behavior rather than reasoning from one screenshot or one route.
+- Codex Code Review is the independent reviewer, not the implementer. It does not
+  remediate, push implementation commits, or merge the PR.
+- After the implementation owner pushes a substantive remediation for Codex findings,
+  that implementation owner must post `@codex review` on the same pull request and
+  wait for the fresh-head review result. The operator should not have to trigger routine
+  re-review manually.
+- Human merge remains required for system/code/config/schema/shared-copy/docs/CI/
+  deployment changes.
+
 ## 11. Cross-agent review
 
 Convoke is maintained by more than one agent family (Claude and
