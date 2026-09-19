@@ -53,6 +53,12 @@ author, no invented name or bio.
 
 ## Operating model
 
+System changes and content publication share the same durable substrate but use
+different final paths.
+
+For code, configuration, schema, shared UI copy, repository documentation, CI,
+deployment rules or architecture:
+
 ```
 human intent (usually from a phone)
   → cloud AI agent
@@ -65,10 +71,21 @@ human intent (usually from a phone)
   → automatic deployment to convoke.space
 ```
 
-The human sets direction, requests changes, reviews outcomes, and approves
-publication. The human does **not** need a permanent local clone or a
+For an exact content candidate that has already passed the private editorial and
+independent-review gates:
+
+```
+explicit human publication command
+  → validated content-only package against current public/main
+  → direct non-force commit to main
+  → automatic deployment to convoke.space
+```
+
+The human sets direction, requests changes, reviews outcomes, and makes the
+publication decision. The human does **not** need a permanent local clone or a
 development machine. GitHub is the source of truth; cloud agents are disposable
-execution environments; Vercel is the runtime.
+execution environments; Vercel is the runtime. The narrow content-only exception
+does not apply to system changes.
 
 ## The two-repository architecture
 
@@ -82,7 +99,11 @@ execution environments; Vercel is the runtime.
 repository, no runtime dependency on it, no hidden synchronisation.
 
 Material becomes public only through an explicit promotion: review, edit,
-sanitize, promote, pull request, validation, merge. Promotion produces a clean
+sanitize, independent verification, explicit human publication authorization,
+and validation against the current public repository. For an exact reviewed
+content-only candidate, that final authorized package may be committed directly
+to public `main`; if publication requires any system change, the normal
+branch/pull-request/human-merge path applies. Promotion produces a clean
 publishable artifact — it is never a copy.
 
 Why this and not one repository with a `drafts/` folder: the boundary makes the
@@ -153,8 +174,11 @@ repositories. They share no memory and cannot see each other's reasoning.
 Everything that matters therefore lives in GitHub: issues, branches, commits,
 pull requests, review comments, documented decisions, CI results.
 
-Implementer and reviewer should be different agents where practical. A human
-merges to `main` — two models agreeing is not a control.
+Implementer and reviewer should be different agents where practical. For system
+changes, a human merges to `main`. For an exact independently reviewed
+content-only candidate, the human's explicit publication command is the final
+publication gate and the validated package may use the narrow direct-main path.
+Two models agreeing is not a control.
 
 ## What "done" means
 

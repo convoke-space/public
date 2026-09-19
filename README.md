@@ -24,8 +24,9 @@ Next.js (App Router) · React · TypeScript · Tailwind CSS · MDX content on di
 deployed on Vercel.
 
 No database, no CMS, no authentication, no analytics, no web fonts, no
-third-party scripts, and no i18n framework. Content is files in git; publishing
-is a pull request.
+third-party scripts, and no i18n framework. Content is files in git. An exact
+independently reviewed content candidate may be published directly to main after
+explicit human authorization and full validation; system changes still use PRs.
 
 ## Layout
 
@@ -74,8 +75,10 @@ sessions. Before making a change, read:
 | [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) | Vercel, domains, environment |
 | [`docs/AGENT-COLLABORATION.md`](docs/AGENT-COLLABORATION.md) | How multiple agents share one repository |
 
-Branch naming: `claude/<task>`, `codex/<task>`, `content/<slug>`, `fix/<task>`.
-One task, one owner, one branch. `main` is production and a human merges.
+System-change branch naming: `claude/<task>`, `codex/<task>`, `fix/<task>`.
+One task, one owner, one branch. `main` is production. System changes require
+human merge; explicitly authorized content-only publication uses the validated
+direct-main exception in `AGENTS.md` §10.
 
 ## The two-repository boundary
 

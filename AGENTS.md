@@ -18,9 +18,10 @@ is not a portfolio template, not a SaaS landing page, and not a blog engine to
 be generalised.
 
 It is operated as an **AI-native software system**: a human sets direction from
-a phone or a browser, cloud agents implement against GitHub, automated checks
-validate, and a human merges. There is no permanent development machine in the
-loop. The repository is the durable state; agents are disposable.
+a phone or a browser, cloud agents work against GitHub, and automated checks
+validate. System changes end in a human merge; an explicitly authorized,
+independently reviewed content-only publication may be validated and committed
+directly to `main`. There is no permanent development machine in the loop. The repository is the durable state; agents are disposable.
 
 Two consequences follow, and they drive nearly every rule below:
 
@@ -286,39 +287,72 @@ Beyond the commands, a change is not done until:
 
 **Do not equate file creation with completion.** Run the commands.
 
-## 10. Branches and pull requests
+## 10. Branches, pull requests and the content-only exception
 
-One task, one owner, one branch. Two agents must never work on the same branch.
+System work uses one task, one owner, one branch. Two agents must never work on
+the same branch.
 
 ```
 claude/<task>     work owned by Claude
 codex/<task>      work owned by ChatGPT/Codex
-content/<slug>    a publication
 fix/<task>        a repair
 ```
 
-Pull requests:
+For **code, dependencies, configuration, schema, shared UI copy, repository
+documentation, CI, deployment rules or architecture**, always use:
 
-- Prefer a PR over a direct push to `main`, always.
-- Describe the reasoning, not just the diff. The PR body is the handoff to
-  whichever agent reads it next.
-- Keep the PR to one concern. Do not widen scope opportunistically.
-- State exactly which validation you ran.
+```
+branch → pull request → independent review → human merge
+```
 
-`main` is production. During the early operating period, a human merges.
-**Two language models agreeing with each other is not a review gate.**
+Describe the reasoning, keep the PR to one concern, and state exactly which
+validation ran.
+
+### Content-only direct publication
+
+A narrow exception exists for an exact content candidate that already passed the
+private Content OS review/verification gates and that the human explicitly
+authorizes with a publication command such as `공개 진행해`.
+
+That publication may commit directly to `main` only when **all** of these hold:
+
+- every changed path is under `content/posts/`, `content/projects/` or
+  `content/events/`;
+- the prose is the exact reviewed candidate, apart from mechanical frontmatter,
+  locale pairing, slug and metadata packaging allowed by the current publishing
+  contract;
+- no substantive claim, experience, judgement or argument is added or changed;
+- the full `npm run verify` passes on the exact intended bytes against current
+  `main`;
+- the publisher confirms `main` has not changed since that validated snapshot;
+- the commit is non-force and contains no code, docs, config, dependency or CI
+  change;
+- the resulting `main` commit and published blob hashes are fetched and
+  confirmed after the write.
+
+The human's explicit publication command is the final content publication
+authorization. Do not require a second PR/merge ceremony for that content-only
+case. If any condition above fails, stop and use the system-change PR path.
+
+`main` is production. Direct content publication is therefore intentionally
+narrow and must be fully validated before the commit.
 
 ## 11. Cross-agent review
 
 Convoke is maintained by more than one agent family (Claude and
 ChatGPT/Codex). They share no memory. GitHub is the only collaboration layer.
 
-Preferred flow:
+Preferred flow for system changes:
 
 ```
 Issue → implementation (agent A) → PR → independent review (agent B)
       → remediation (agent A) → CI → human approval → merge
 ```
+
+For direct content publication, the substantive review happens in the private
+Content OS before the explicit human publication command. Public-side packaging
+must not rewrite the article. If it does, the candidate goes back through
+independent content review before publication.
 
 A reviewer inspects the implementation itself. Do not approve a summary.
 
@@ -370,8 +404,10 @@ what the human wants to say publicly — including anything covered by §5.3 and
 §5.4.
 
 Everything else — directory layout, component structure, styling organisation,
-package choices, test structure, metadata details — is yours to decide. Decide
-it, do it, and explain the reasoning in the PR.
+package choices, test structure, metadata details — is yours to decide. For
+system changes, decide it, do it, and explain the reasoning in the PR. For an
+already authorized content-only publication, apply only the validated content
+bytes and complete the direct-main publication flow.
 
 When you do need a human: finish everything that does not depend on the answer
 first, prepare the repository for the missing step, and state the exact action
