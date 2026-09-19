@@ -71,6 +71,10 @@ already thinking about, which is exactly the set that does not need checking.
 
 ## Review standard
 
+Repository-wide Codex GitHub review instructions are canonical in
+`AGENTS.md ## Code Review Rules`. Keep the detailed rules there rather than
+duplicating them in vendor-specific or collaboration documents.
+
 Cover, at minimum: requirement coverage, regressions, runtime correctness,
 build correctness, broken links, type safety, responsive behaviour,
 accessibility, SEO, performance, dependency risk, security, privacy leakage,
