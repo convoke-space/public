@@ -66,7 +66,7 @@ sessions. Before making a change, read:
 
 | File | What it covers |
 | --- | --- |
-| [`AGENTS.md`](AGENTS.md) | The shared constitution — rules every agent follows |
+| [`AGENTS.md`](AGENTS.md) | The shared constitution, including `## Code Review Rules` for Codex GitHub review |
 | [`CLAUDE.md`](CLAUDE.md) | Claude-specific notes and known pitfalls |
 | [`docs/PROJECT-BRIEF.md`](docs/PROJECT-BRIEF.md) | What this project is and why it is shaped this way |
 | [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | How the code is put together |
