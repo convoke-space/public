@@ -264,7 +264,7 @@ const ko: Dictionary = {
             "Next.js와 TypeScript로 만들고 Tailwind CSS로 스타일을 입혔으며, 글은 MDX로 씁니다. 배포는 Vercel입니다. 타이포그래피는 운영체제에 이미 있는 서체만 사용합니다. 내려받을 웹폰트가 없으니 느려질 일도, 몇 년 뒤에 깨질 일도 없습니다.",
           ],
           [
-            "분석 스크립트, 추적기, 쿠키 배너, 외부 임베드가 없습니다. 이 사이트는 방문자에 대해 아무것도 수집하지 않습니다. 모임 신청은 외부 서비스로 연결하고, 참가자 정보는 이 저장소에 남기지 않습니다.",
+            "Vercel Web Analytics로 페이지 조회와 방문자 수, 유입 경로, 대략적인 국가·브라우저·기기 같은 트래픽 정보를 측정합니다. Vercel은 이 분석이 쿠키를 사용하지 않고 다른 사이트를 가로질러 방문자를 추적하지 않는 방식이라고 설명합니다. 별도의 광고 추적기나 외부 임베드는 없습니다. 모임 신청은 외부 서비스로 연결하고, 참가자 정보는 이 저장소에 남기지 않습니다.",
           ],
           [
             "소스는 공개되어 있습니다: ",
@@ -440,7 +440,7 @@ const en: Dictionary = {
             "Built with Next.js and TypeScript, styled with Tailwind CSS, written in MDX, and deployed on Vercel. Typography uses only faces the reader\u2019s operating system already has — no web fonts, nothing to download, nothing to break in five years.",
           ],
           [
-            "There is no analytics script, no tracker, no cookie banner, and no third-party embed. Nothing here collects information about you. Event registration, when it is open, is handled by an external provider and linked to explicitly.",
+            "Vercel Web Analytics measures page views and visitors, referrers, and coarse traffic attributes such as country, browser, and device. Vercel documents this analytics as cookie-free and designed not to track visitors across sites. There are no separate advertising trackers or third-party embeds. Event registration, when it is open, is handled by an external provider and linked to explicitly.",
           ],
           [
             "The source is public: ",
