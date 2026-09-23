@@ -298,7 +298,8 @@ test.
 ## Deliberate constraints
 
 - No i18n framework, no browser-language redirect, no locale cookie.
-- No client-side analytics, trackers, or third-party embeds.
+- Vercel Web Analytics is the only approved traffic analytics integration; no
+  unrelated trackers or third-party embeds.
 - No runtime data source, so no availability risk beyond the CDN.
 - No syntax highlighting: a large dependency for a small benefit today.
 - No `dangerouslySetInnerHTML` except in `JsonLd`, where the payload is built
