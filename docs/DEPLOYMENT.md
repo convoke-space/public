@@ -21,6 +21,19 @@ never part of a deployment.
 | Output | `.next` (default) |
 | Node version | 22.x |
 
+### Web Analytics
+
+The repository integrates Vercel Web Analytics through the official
+`@vercel/analytics` package. Because Convoke has two root layouts, the
+`<Analytics />` component is mounted in both `src/app/(gateway)/layout.tsx`
+and `src/app/[locale]/layout.tsx` so the locale-neutral gateway and both
+localized editions are covered.
+
+No analytics environment variable or custom `vercel.json` setting is required.
+The Vercel project itself must have Web Analytics enabled in the dashboard; once
+the code reaches a deployment and the site is visited, page-view data should
+begin appearing in the Analytics view.
+
 No custom configuration is required, and there is deliberately no `vercel.json`
 — every setting above is either the platform default or set once in the
 dashboard. Adding a config file would be a second place for deployment truth to
