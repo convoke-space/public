@@ -121,7 +121,7 @@ card overload, unnecessary dashboards, decorative complexity.
 
 Concretely, as built: system font stacks (no web fonts), one token palette that
 swaps with the reader's colour-scheme preference, a single list primitive
-reused across every section, no client-side analytics, no third-party embeds.
+reused across every section, Vercel Web Analytics as the sole traffic analytics integration, no unrelated third-party trackers or embeds.
 
 ## Information architecture
 
@@ -194,7 +194,7 @@ Recorded so nobody re-litigates them by accident:
 - **No web fonts** — durability and speed over a bespoke typeface.
 - **No syntax highlighting** — would add a large dependency; code blocks are
   styled plainly. Revisit only if the writing demands it.
-- **No analytics** — nothing about readers is collected.
+- **No general analytics stack** — traffic measurement is limited to Vercel Web Analytics; no unrelated tracker is added.
 - **No schema-validation library** — the frontmatter validator is ~200 lines of
   dependency-free, tested code.
 - **No `cover` image field, and no `featured` flag** — social cards are
