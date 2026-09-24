@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { Analytics } from "@vercel/analytics/next";
 import "../globals.css";
 import { DEFAULT_LOCALE, siteConfig } from "../../../site.config";
 import { getDictionary } from "@/lib/i18n";
@@ -56,7 +57,10 @@ export default function GatewayLayout({
 }) {
   return (
     <html lang={siteConfig.htmlLang[DEFAULT_LOCALE]}>
-      <body className="flex min-h-dvh flex-col antialiased">{children}</body>
+      <body className="flex min-h-dvh flex-col antialiased">
+        {children}
+        <Analytics />
+      </body>
     </html>
   );
 }

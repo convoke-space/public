@@ -23,8 +23,9 @@ Node 22 or newer.
 Next.js (App Router) · React · TypeScript · Tailwind CSS · MDX content on disk ·
 deployed on Vercel.
 
-No database, no CMS, no authentication, no analytics, no web fonts, no
-third-party scripts, and no i18n framework. Content is files in git. An exact
+No database, no CMS, no authentication, no web fonts, and no i18n framework.
+Traffic measurement uses Vercel Web Analytics as the sole approved analytics
+integration; there are no unrelated third-party trackers. Content is files in git. An exact
 independently reviewed content candidate may be published directly to main after
 explicit human authorization and full validation; system changes still use PRs.
 

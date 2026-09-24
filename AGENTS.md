@@ -179,7 +179,7 @@ content on disk, deployed on Vercel.
 
 - **YAGNI.** Do not add infrastructure for a requirement that does not exist.
   Specifically not now: database, authentication, user accounts, CMS, comments,
-  newsletter backend, paid membership, attendee database, analytics stack.
+  newsletter backend, paid membership, attendee database.
 - **No i18n framework.** Two locales, a `[locale]` route segment, and a typed
   dictionary in `src/lib/i18n.ts`. That is the whole mechanism; keep it.
 - **Prefer the platform.** If Next.js, the web platform, or twenty lines of
@@ -209,8 +209,9 @@ content on disk, deployed on Vercel.
 - Colours, type scale and spacing come from the tokens in
   `src/app/globals.css`. Do not introduce ad-hoc hex values in components.
 - Comments explain *why*, not *what*. Match the density of the surrounding code.
-- No web fonts, no third-party scripts, no trackers, no embeds. This is a
-  product decision, not an oversight.
+- No web fonts, third-party embeds, or unrelated third-party scripts. Vercel
+  Web Analytics via `@vercel/analytics` is the sole approved traffic analytics
+  integration; adding any other tracker requires an explicit product decision.
 
 Code, comments and repository documentation are written in English, for
 technical consistency. Reader-facing copy is bilingual.
