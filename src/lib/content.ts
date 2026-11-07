@@ -155,13 +155,25 @@ export function published<C extends Collection>(
   );
 }
 
+function safeDecode(value: string): string {
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return value;
+  }
+}
+
 export function getEntry<C extends Collection>(
   collection: C,
   locale: Locale,
   slug: string,
   root: string = CONTENT_ROOT,
 ): Entry<C> | undefined {
-  const wanted = slug.normalize("NFC");
+  // At build time Next 16 hands a page its `[slug]` param still percent-encoded
+  // (`ai-%EC%95%B0…`), so a Hangul slug never matched its file and the page was
+  // prerendered as a 404. Slugs cannot contain `%` (SLUG_PATTERN), so decoding
+  // is lossless; a malformed sequence is simply left as it is.
+  const wanted = safeDecode(slug).normalize("NFC");
   return published(collection, locale, root).find((e) => e.slug === wanted);
 }
 

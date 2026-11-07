@@ -90,6 +90,18 @@ async function run() {
     check(`200 ${path}`, status === 200, `expected 200, got ${status}`);
   }
 
+  // Every page the sitemap advertises must actually serve. A Hangul slug was once
+  // prerendered as a 404 while its English counterpart worked; no fixed list of
+  // paths would have caught that, but the sitemap names every published entry.
+  const sitemap = await get("/sitemap.xml");
+  const locs = [...sitemap.html.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1]);
+  check("sitemap", locs.length > 0, "sitemap lists no URLs");
+  for (const loc of locs) {
+    const { pathname } = new URL(loc);
+    const { status } = await get(pathname);
+    check(`200 ${decodeURIComponent(pathname)}`, status === 200, `expected 200, got ${status}`);
+  }
+
   // Locale documents keep their own language.
   for (const [path, lang] of [
     ["/ko", "ko"],
