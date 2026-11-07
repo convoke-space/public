@@ -54,6 +54,17 @@ describe("locale handling", () => {
   });
 });
 
+describe("percent-encoded slugs", () => {
+  it("finds a Hangul entry from the encoded param Next passes at build time", () => {
+    const encoded = encodeURIComponent("깃허브를-공용기억으로");
+    expect(getEntry("posts", "ko", encoded, FIXTURES)?.slug).toBe("깃허브를-공용기억으로");
+  });
+
+  it("leaves a malformed sequence alone instead of throwing", () => {
+    expect(getEntry("posts", "ko", "%E0%A4%A", FIXTURES)).toBeUndefined();
+  });
+});
+
 describe("content validation", () => {
   it("rejects a duplicate translationKey inside one locale", () => {
     const root = path.join(__dirname, "fixtures", "duplicate-key");
