@@ -1,9 +1,13 @@
 import { siteConfig, type Locale } from "../../site.config";
 
 /**
- * Dates are formatted in UTC on purpose: server and client must agree, and a
- * published date is a fact about the archive, not about the reader's timezone.
+ * Dates are formatted in one fixed zone, Korea Standard Time, on purpose:
+ * server and client must agree, and a published date is a fact about the
+ * archive, not about the reader's timezone. KST because the operator publishes
+ * from Korea; in UTC a post published at 05:30 KST showed the previous day.
  */
+
+const TIME_ZONE = "Asia/Seoul";
 
 const cache = new Map<string, Intl.DateTimeFormat>();
 
@@ -12,7 +16,7 @@ function formatter(locale: Locale, options: Intl.DateTimeFormatOptions, key: str
   const existing = cache.get(cacheKey);
   if (existing) return existing;
   const created = new Intl.DateTimeFormat(siteConfig.intlLocale[locale], {
-    timeZone: "UTC",
+    timeZone: TIME_ZONE,
     ...options,
   });
   cache.set(cacheKey, created);
