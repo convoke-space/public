@@ -76,8 +76,9 @@ When in doubt, ship the architecture and leave the prose to the human.
 - **No user-facing string belongs in a component.** It goes in
   `src/lib/i18n.ts`, where both locales are type-checked.
 - **Do not hard-code the production origin.** Import from `@/lib/site`.
-- **Dates are formatted in UTC** deliberately, to keep server and client output
-  identical. Do not switch to local time.
+- **Dates are formatted in one fixed zone, KST (`Asia/Seoul`),** deliberately, to
+  keep server and client output identical and match where the operator
+  publishes. Do not switch to the reader's local time.
 - **OG images and favicons are generated** by `next/og` at build time. There are
   no binary image assets to update.
 
