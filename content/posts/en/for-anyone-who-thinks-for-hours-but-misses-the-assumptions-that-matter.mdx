@@ -1,0 +1,44 @@
+---
+title: "For Anyone Who Thinks for Hours but Misses the Assumptions That Matter"
+description: "Scrapping an internal remote-work and leave system I built with Claude Artifacts made me realize, too late, that my long deliberations had missed a crucial assumption."
+date: "2026-11-10"
+translationKey: "for-anyone-who-thinks-for-hours-but-misses-the-assumptions-that-matter"
+---
+
+Scrapping an internal remote-work and leave system I built with Claude Artifacts made me realize, too late, that my long deliberations had missed a crucial assumption.
+
+Building the first version felt good. What I had imagined took the shape of a working service. The result was so convincing that I became absorbed in building it. I only checked what it would take to run it in practice later.
+
+That was when I learned about the document and storage limits. As I looked for a way forward before deployment, I also found a security problem. In the system I had built, showing different screens to different accounts did not prevent people from reading or changing someone else's data. I decided I could not use it as it stood, scrapped it, and went back to considering my options.
+
+Had I known earlier, I would have chosen an approach with those constraints in mind. Artifacts had been excellent at producing a working first version. Making that version usable for real work still required a great deal of technical judgment. I discovered the distance between the two too late.
+
+But taking “be more careful next time” as the lesson feels odd. I already tend to deliberate at length and spend my time cautiously. I had put time into this, yet I had not adequately examined the conditions that would determine whether I could use it. Would spending even longer thinking have changed that?
+
+“How do I finish this system?” carries an expectation that it can be finished in the environment I have already chosen. Within that frame, there is always more to work on. I can spend any amount of time refining features or fixing problems I find. Whether that environment can meet the requirements for actual use is a separate question.
+
+Looking back, I think my deliberations needed that distinction too.
+
+Organizational learning researcher Chris Argyris distinguished learning that corrects errors within existing objectives from “double-loop learning,” which reexamines the objectives or policies themselves. Applied to this experience, that means examining both how to solve the problems I found and whether I have a reason to continue with the current approach given those problems.
+
+I could look for ways to reduce the data to fit the storage limit. I also need to consider whether there is a reason to keep using that environment with its limit. Before refining how different screens show different data, I need to establish whether the environment can enforce the access controls I require.
+
+Depending on the answers, I might keep building, reduce the scope, or change environments. When I ask those questions late, I start by looking for ways to preserve what I have already built.
+
+This is where I could try changing how I ask AI for help. We could examine what must be true for the current plan to work, which of those things have been verified, and which remain assumptions. I could ask it to start with conditions that would change my choice of tool or implementation if they turned out to be false.
+
+A premortem offers one way to make this more concrete. It starts by imagining that a project has already failed and looking ahead for what might have caused that failure. Guidance from the US Agency for Healthcare Research and Quality, or AHRQ, moves from gathering possible causes to prioritizing them and identifying actions to address them.
+
+In my case, I could ask something like this:
+
+“Assume I finished building this remote-work and leave system but ultimately had to scrap it because I could not use it. What conditions would lead to that decision? For each one, suggest official documentation or a test that would establish whether it actually applies. Help me use the results to decide whether to keep building, reduce the scope, or change environments. Leave anything without supporting evidence marked as unverified.”
+
+If AI stops at a long list of possible failures, it may simply give me more things to dwell on. I need help that goes as far as identifying what to check first and what result should make me change my choice.
+
+A storage limit, for instance, does not by itself mean a system is unusable. It needs to be compared with expected usage. For permissions, I need to use test accounts and dummy data to check whether access to another user's data is actually denied. An explanation that the data is hidden from the screen is not enough.
+
+Those checks remain even if AI produces a convincing review. I need to distinguish what can be established from documentation, what needs to be tested, and what cannot yet be known. That may help me avoid confusing the feeling of having completed a review with what I have actually verified.
+
+I thought I was spending my time carefully. Whether the thinking I did during that time was meaningful turned out to be a separate matter. This time, the gap left me with a system I could not use.
+
+Next time, before adding more features, I want to check one condition that could change my choice. I could start by finding out whether the environment can provide the permissions I need, and look for another approach before building further if it cannot. That is the kind of small check I want to begin with when I talk about giving my thinking some substance.
