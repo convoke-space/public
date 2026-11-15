@@ -29,6 +29,16 @@ The repository integrates Vercel Web Analytics through the official
 and `src/app/[locale]/layout.tsx` so the locale-neutral gateway and both
 localized editions are covered.
 
+Both layouts (and the global 404) mount it through
+`src/components/site-analytics.tsx`, which drops page views from the
+operator's own browsers. The operator holds two private links whose query value
+is a long random token; opening the "on" link once marks that browser
+(localStorage `va-disable`, as in Vercel's opt-out docs) and the "off" link
+unmarks it. Only SHA-256 hashes of the tokens are in `src/lib/owner-visit.ts`,
+because this repository is public; to rotate, generate two new 32-byte
+base64url tokens and replace the hashes. The parameter is removed from the
+address bar right away.
+
 No analytics environment variable or custom `vercel.json` setting is required.
 The Vercel project itself must have Web Analytics enabled in the dashboard; once
 the code reaches a deployment and the site is visited, page-view data should
