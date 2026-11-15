@@ -1,7 +1,7 @@
 import "./globals.css";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Analytics } from "@vercel/analytics/next";
+import { SiteAnalytics } from "@/components/site-analytics";
 import { LOCALES, DEFAULT_LOCALE, siteConfig } from "../../site.config";
 import { getDictionary } from "@/lib/i18n";
 import { localePath } from "@/lib/site";
@@ -64,7 +64,7 @@ export default function GlobalNotFound() {
             })}
           </div>
         </main>
-        <Analytics />
+        <SiteAnalytics />
       </body>
     </html>
   );
