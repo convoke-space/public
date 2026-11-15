@@ -3,34 +3,44 @@
 import { useEffect } from "react";
 import { Analytics } from "@vercel/analytics/next";
 import {
-  OWNER_PARAM,
-  applyOwnerFlag,
-  withoutOwnerParam,
+  applyOwnerLink,
+  findOwnerLink,
+  isExcluded,
+  withoutParam,
 } from "@/lib/owner-visit";
 
-/** True when this browser is marked as the operator's (see owner-visit.ts). */
-function isOwnerBrowser(): boolean {
+function storage(): Storage | null {
   try {
-    return applyOwnerFlag(window.location.search, window.localStorage);
+    return window.localStorage;
   } catch {
-    // Storage blocked (e.g. some private modes): count the visit as usual.
-    return false;
+    // Storage blocked (e.g. some private modes): count visits as usual.
+    return null;
   }
 }
 
 /** Vercel Web Analytics, minus page views from the operator's own browsers. */
 export function SiteAnalytics() {
   useEffect(() => {
-    isOwnerBrowser();
     const { pathname, search, hash } = window.location;
-    if (new URLSearchParams(search).has(OWNER_PARAM)) {
+    if (!search) return;
+    void findOwnerLink(search).then((link) => {
+      if (!link) return;
+      const store = storage();
+      if (store) applyOwnerLink(link, store);
       window.history.replaceState(
         window.history.state,
         "",
-        pathname + withoutOwnerParam(search) + hash,
+        pathname + withoutParam(search, link.param) + hash,
       );
-    }
+    });
   }, []);
 
-  return <Analytics beforeSend={(event) => (isOwnerBrowser() ? null : event)} />;
+  return (
+    <Analytics
+      beforeSend={(event) => {
+        const store = storage();
+        return store && isExcluded(event.url, store) ? null : event;
+      }}
+    />
+  );
 }

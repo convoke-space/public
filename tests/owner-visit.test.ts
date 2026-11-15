@@ -1,8 +1,12 @@
+import { createHash, randomBytes } from "node:crypto";
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import {
   OWNER_STORAGE_KEY,
-  applyOwnerFlag,
-  withoutOwnerParam,
+  applyOwnerLink,
+  findOwnerLink,
+  isExcluded,
+  withoutParam,
 } from "@/lib/owner-visit";
 
 function memoryStorage() {
@@ -14,27 +18,37 @@ function memoryStorage() {
   };
 }
 
-describe("owner visit flag", () => {
-  it("?me=1 marks the browser and the mark persists without the param", () => {
+describe("owner visit links", () => {
+  it("stores hashes, never a raw link value", () => {
+    const source = readFileSync("src/lib/owner-visit.ts", "utf8");
+    const hashes = source.match(/"[0-9a-f]{64}"/g) ?? [];
+    expect(hashes).toHaveLength(2);
+  });
+
+  it("ignores values that are not the links", async () => {
+    const fake = randomBytes(32).toString("base64url");
+    expect(createHash("sha256").update(fake).digest("hex")).toHaveLength(64);
+    expect(await findOwnerLink(`?x=${fake}`)).toBeNull();
+    expect(await findOwnerLink("?me=1")).toBeNull();
+  });
+
+  it("on sets the mark, off clears it, and the mark alone excludes", () => {
     const s = memoryStorage();
-    expect(applyOwnerFlag("?me=1", s)).toBe(true);
+    applyOwnerLink({ action: "on", param: "x" }, s);
     expect(s.getItem(OWNER_STORAGE_KEY)).toBe("1");
-    expect(applyOwnerFlag("", s)).toBe(true);
+    expect(isExcluded("https://convoke.space/ko", s)).toBe(true);
+    applyOwnerLink({ action: "off", param: "x" }, s);
+    expect(isExcluded("https://convoke.space/ko", s)).toBe(false);
   });
 
-  it("?me=0 clears the mark", () => {
-    const s = memoryStorage();
-    applyOwnerFlag("?me=1", s);
-    expect(applyOwnerFlag("?me=0", s)).toBe(false);
-    expect(applyOwnerFlag("", s)).toBe(false);
+  it("drops a view whose URL may still carry a link value", () => {
+    const v = randomBytes(32).toString("base64url");
+    expect(isExcluded(`https://convoke.space/ko?q=${v}`, memoryStorage())).toBe(true);
+    expect(isExcluded("https://convoke.space/ko?utm_source=x", memoryStorage())).toBe(false);
   });
 
-  it("an unmarked browser is counted", () => {
-    expect(applyOwnerFlag("?q=x", memoryStorage())).toBe(false);
-  });
-
-  it("strips only the me param", () => {
-    expect(withoutOwnerParam("?me=1")).toBe("");
-    expect(withoutOwnerParam("?a=1&me=1&b=2")).toBe("?a=1&b=2");
+  it("strips only the link's parameter", () => {
+    expect(withoutParam("?k=v", "k")).toBe("");
+    expect(withoutParam("?a=1&k=v&b=2", "k")).toBe("?a=1&b=2");
   });
 });
