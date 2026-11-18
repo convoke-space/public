@@ -58,6 +58,11 @@ export const siteConfig = {
     { path: "/about" },
   ] satisfies NavItem[],
   repositoryUrl: "https://github.com/convoke-space/public",
+  /**
+   * The publication's public role address, shown in the footer. It forwards
+   * to a private mailbox, which never appears here (AGENTS.md §4).
+   */
+  contactEmail: "hello@convoke.space",
 } as const;
 
 export type SiteConfig = typeof siteConfig;

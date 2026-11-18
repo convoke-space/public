@@ -24,6 +24,14 @@ export function SiteFooter({
         <div className="max-w-sm">
           <p className="font-serif text-base text-ink">{siteConfig.name}</p>
           <p className="mt-1.5">{dict.tagline}</p>
+          <p className="mt-3">
+            <a
+              href={`mailto:${siteConfig.contactEmail}`}
+              className="link-underline"
+            >
+              {siteConfig.contactEmail}
+            </a>
+          </p>
         </div>
 
         <nav aria-label={dict.footer.nav}>
