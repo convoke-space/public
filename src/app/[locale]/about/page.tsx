@@ -62,7 +62,7 @@ export default async function AboutPage({
               rhythm between direct children, so the blocks must stay flat. */}
           {about.sections.map((section) => (
             <Fragment key={section.heading}>
-              <h2 id={section.id}>{section.heading}</h2>
+              <h2>{section.heading}</h2>
               {section.paragraphs.map((paragraph, index) => (
                 <p key={index}>
                   <ProseCopy locale={locale} prose={paragraph} />

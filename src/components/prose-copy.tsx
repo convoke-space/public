@@ -8,7 +8,7 @@ import { localePath } from "@/lib/site";
  *
  * Reader-facing copy lives in `src/lib/i18n.ts` (AGENTS.md §7), so a component
  * never holds a sentence. This is the piece that turns that data into markup:
- * an `href` starting with "http" or "mailto:" is external, anything else is a
+ * an `href` starting with "http" is external, anything else is a
  * locale-relative site path.
  */
 export function ProseCopy({
@@ -29,10 +29,6 @@ export function ProseCopy({
 
 function InlineNode({ locale, node }: { locale: Locale; node: Inline }) {
   if (typeof node === "string") return <>{node}</>;
-
-  if (node.href.startsWith("mailto:")) {
-    return <a href={node.href}>{node.text}</a>;
-  }
 
   if (node.href.startsWith("http")) {
     return (

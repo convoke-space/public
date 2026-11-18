@@ -13,7 +13,7 @@ import { DEFAULT_LOCALE, LOCALES, type Locale } from "../../site.config";
 /**
  * A run of reader-facing text, optionally linked.
  *
- * An `href` starting with "http" or "mailto:" is external; anything else is a
+ * An `href` starting with "http" is external; anything else is a
  * locale-relative site path that the renderer resolves with `localePath`.
  */
 export type Inline = string | { text: string; href: string };
@@ -22,8 +22,6 @@ export type Prose = Inline[];
 
 export type AboutSection = {
   heading: string;
-  /** Fragment id for the heading, when other pages link straight to it. */
-  id?: string;
   paragraphs: Prose[];
   /** Rendered as a list after the paragraphs, when the section has one. */
   list?: Prose[];
@@ -121,7 +119,6 @@ export type Dictionary = {
   };
   footer: {
     nav: string;
-    contact: string;
     rss: string;
     builtInTheOpen: string;
     sourceOnGitHub: string;
@@ -278,21 +275,6 @@ const ko: Dictionary = {
           ],
         ],
       },
-      {
-        heading: "연락",
-        id: "contact",
-        paragraphs: [["일과 관련한 연락은 목적에 맞는 주소로 메일을 보내 주세요."]],
-        list: [
-          [
-            "협찬·제휴 — ",
-            { text: "partners@convoke.space", href: "mailto:partners@convoke.space" },
-          ],
-          [
-            "인터뷰·출판 제안과 그 밖의 문의 — ",
-            { text: "hello@convoke.space", href: "mailto:hello@convoke.space" },
-          ],
-        ],
-      },
     ],
   },
   notFound: {
@@ -309,7 +291,6 @@ const ko: Dictionary = {
   },
   footer: {
     nav: "바닥글",
-    contact: "연락",
     rss: "RSS",
     builtInTheOpen: "공개적으로 만듭니다 —",
     sourceOnGitHub: "GitHub 소스",
@@ -470,21 +451,6 @@ const en: Dictionary = {
           ],
         ],
       },
-      {
-        heading: "Contact",
-        id: "contact",
-        paragraphs: [["For anything work-related, please write to the address that fits."]],
-        list: [
-          [
-            "Sponsorships and partnerships — ",
-            { text: "partners@convoke.space", href: "mailto:partners@convoke.space" },
-          ],
-          [
-            "Interviews, book proposals and anything else — ",
-            { text: "hello@convoke.space", href: "mailto:hello@convoke.space" },
-          ],
-        ],
-      },
     ],
   },
   notFound: {
@@ -501,7 +467,6 @@ const en: Dictionary = {
   },
   footer: {
     nav: "Footer",
-    contact: "Contact",
     rss: "RSS",
     builtInTheOpen: "Built in the open —",
     sourceOnGitHub: "source on GitHub",
