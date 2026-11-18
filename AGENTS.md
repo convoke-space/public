@@ -82,7 +82,9 @@ Material becomes public through an explicit promotion. See `docs/PUBLISHING.md`.
 Never commit to `convoke-space/public`:
 
 - API keys, tokens, passwords, OAuth secrets, service-role credentials
-- Personal contact information (the operator's own, or anyone else's)
+- Personal contact information (the operator's own, or anyone else's). The
+  publication's own role addresses at `convoke.space`, listed on the About
+  page, are not personal; the private mailbox they forward to is.
 - Event attendee data, customer data, or anything identifying a private person
 - Employer, client or third-party confidential material
 - Unpublished commercial information

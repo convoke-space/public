@@ -302,9 +302,10 @@ describe("no secrets in the public repository", () => {
 
   it("carries no personal contact details", () => {
     // Convoke publishes as an organisation; no personal email or phone number
-    // belongs in a permanently public repository. See AGENTS.md §4.
+    // belongs in a permanently public repository. See AGENTS.md §4. The
+    // publication's own role addresses on the About page are the exception.
     const email = /[A-Za-z0-9._%+-]+@(?!example\.|schema\.)[A-Za-z0-9.-]+\.[A-Za-z]{2,}/;
-    const allowed = /noreply@anthropic\.com/;
+    const allowed = /^(?:noreply@anthropic\.com|(?:partners|hello)@convoke\.space)$/;
     const offenders = SCANNED.filter((file) => {
       const matches = read(file).match(new RegExp(email, "g")) ?? [];
       return matches.some((match) => !allowed.test(match));

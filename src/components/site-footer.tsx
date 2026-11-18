@@ -44,6 +44,14 @@ export function SiteFooter({
               </Link>
             </li>
             <li>
+              <Link
+                href={localePath(locale, "/about#contact")}
+                className="link-underline"
+              >
+                {dict.footer.contact}
+              </Link>
+            </li>
+            <li>
               <a href={localePath(locale, "/feed.xml")} className="link-underline">
                 {dict.footer.rss}
               </a>
