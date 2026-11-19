@@ -1,0 +1,83 @@
+---
+title: "What If My Colleagues Joined My Claude Session?"
+description: "Watching Stripe’s Orbit demo made me wonder what it would look like to bring colleagues into the way I already work with Claude."
+date: "2026-11-19T11:39:54+09:00"
+translationKey: "what-if-my-colleagues-joined-my-claude-session"
+---
+
+Watching Stripe’s Orbit demo made me wonder what it would look like to bring colleagues into the way I already work with Claude.
+
+I was watching a visit to Stripe’s headquarters on the YouTube channel Not My Business. A tool called Orbit appeared in a segment about the engineering team, and the workflow felt familiar.
+
+When I work with Claude, I bring a topic to a main session, then separate sessions branch off to handle parts of the work. Decisions and results are recorded in the codebase. The work can extend to committing and pushing changes or merging pull requests. I divide the work and bring the results back together instead of trying to handle everything in one conversation.
+
+Watching Orbit, I imagined colleagues joining that workspace.
+
+## When colleagues join the planning
+
+This is how I understood Orbit’s workflow. Someone puts forward a task. The existing codebase is examined, and a plan takes shape in a document. Colleagues read it and contribute feedback. The person with decision-making authority decides which suggestions to accept. The resulting plan is handed to an agent to carry out.
+
+It resembles the way I work on my own, but involving colleagues means making more things visible. Decisions that I can settle with an agent when working alone have to make sense to other people, too. Why did we start this task? What did we decide to change? Which suggestions did we leave out? Colleagues need to be able to follow that process alongside the agent doing the work.
+
+The planning document takes on another purpose. It gives the agent instructions while also giving colleagues a place to intervene before execution. They can adjust the direction while there is still room to change it, instead of first seeing the work once an output is ready.
+
+This might also be worth trying outside engineering. Suppose a team is revising its product introduction materials. It could first examine the existing materials and requested changes, then set out what needs updating. Colleagues could point out omissions or faulty assumptions, and the person responsible could decide the scope. An agent could draft the revision from those decisions and return it to the same workspace for review.
+
+Would colleagues need to read my entire conversation with the AI to participate? If the current plan and unresolved questions were visible, they could probably join the work much more directly.
+
+## Reading the same document leaves questions open
+
+Reading a plan together does not, by itself, mean everyone is ready to act.
+
+In their 1991 paper “Grounding in Communication,” Clark and Brennan described how collective action depends on knowledge, beliefs, and assumptions that people regard as shared. In conversation, people update that common ground by establishing that they have understood one another well enough for the purpose at hand. Their account of common ground and how it develops offers a useful perspective on the collaboration I saw in Orbit.
+
+Sending a document, having someone read it, and having them understand it as intended are different things. Even understanding a proposal does not necessarily mean agreeing with it or authorizing someone to act on it.
+
+Suppose an AI-generated plan says, “We’ll introduce the new guidance next week.” One person might read that as finishing the internal review next week. Another might expect the guidance to start reaching customers. Both have read the document, and neither has objected, yet they expect different things when the work begins.
+
+Now consider an AI revising the plan in response to colleagues’ comments. If a suggestion such as “This direction could work, too” becomes part of the plan, it should be possible to see who actually chose it. A sentence should not quietly become a team decision just because the AI has worked it smoothly into the document.
+
+A workspace like this would therefore seem to need a way to show the status of the content as well as the content itself. Is something a fact established from existing material, an AI proposal, a colleague’s suggestion, or an action the responsible person has approved? It could also record which version of the plan was handed over for execution.
+
+That need not mean an approval process for every sentence. A brief confirmation from the person responsible may be enough for a small task. A change affecting another team’s schedule or responsibilities needs a place for those affected to review it. The amount of checking should fit the work.
+
+Clark and Brennan’s research did not test today’s agent collaboration. But viewed through that lens, the work of turning a plan developed by one person and an AI into something a team can act on becomes a little more concrete.
+
+## What counts as finished outside code
+
+Once the plan is settled, another judgment remains: how will we assess what the agent returns?
+
+In its separate account of Minions, Stripe describes coding agents that do the work, run tests, and prepare a pull request for human review. Delegating the work and accepting the result are distinct steps.
+
+That distinction seems necessary outside engineering as well. If we ask an agent to prepare a customer notice, does having a finished document mean the task is done? We still need to check whether anything necessary is missing, whether it conflicts with existing policy, and whether its wording makes commitments we can actually keep.
+
+Stripe’s July 2026 introduction to Kai, its AI platform for non-engineering work, also points to this difference. Knowledge tasks such as researching an account or preparing review materials vary in their tools, data, and outputs, as well as in what “done” means. The same article described sharing context locked inside sessions and enabling multiple people and agents to collaborate on the same artifacts as work still ahead at the time.
+
+Kai’s description should not be read as a specification for Orbit. It does, however, suggest questions to consider when extending this approach beyond engineering. Moving from one person producing an output with AI to colleagues reviewing it together and starting the next task requires further decisions specific to the work.
+
+## Trying it on one task
+
+Consider a hypothetical task: changing the rules for classifying customer inquiries.
+
+An agent reads the existing rules and inquiry examples it is permitted to review, then proposes revisions. The people responsible for the work comment on cases the new rules might miss. Once the accountable person chooses the rules to use, the agent’s first assignment could be limited to a trial classification of past inquiries.
+
+That would produce something concrete to review. Which inquiries would go to a different department under the new rules? Which would fit no category? How were inquiries involving several departments handled? Actual classification results would be easier to assess than a statement that “the classification rules have been improved.”
+
+The work might also uncover conflicting documents or cases the approved rules cannot resolve. The process could be designed so that the agent returns the decision it needs before filling the gap with its own interpretation. Instead of trying to anticipate every exception at the outset, the team could establish when the agent should come back for a judgment.
+
+The experiment should also be assessed in terms of the work it creates for people, alongside the quality of the document. The team could compare how many cases need reclassification, whether inquiries are being misrouted, and how long it takes to review ambiguous cases. A proposal produced quickly by an agent might still leave people with more checking to do.
+
+The first output could be modest: a page of revised rules, the trial results, and a few exceptions requiring a decision. With that in hand, colleagues would have a shared basis for deciding whether to use the approach in live work.
+
+I return to the image of a colleague joining my Claude session. I would like them to be able to point to an unresolved sentence and say, “Let’s decide this together before it runs,” without having to scroll back to the beginning of a long conversation. Once the work is done, they could review the result in the same place and judge whether it is ready for the next step.
+
+Perhaps that is how room for colleagues could emerge from the way I already work with Claude on my own.
+
+---
+
+**References**
+
+- [Not My Business — 24 Hours Inside Stripe: How They Build So Fast](https://www.youtube.com/watch?v=0Rqoe5quCJQ&t=738s): The original video featuring the Orbit demo. This essay’s account of Orbit follows my observations and interpretation of the video.
+- [Clark & Brennan — Grounding in Communication](https://web.stanford.edu/~clark/1990s/Clark%2C%20H.H.%20_%20Brennan%2C%20S.E.%20_Grounding%20in%20communication_%201991.pdf): Common ground and establishing mutual understanding sufficient for the current purpose.
+- [Stripe — Minions: Stripe’s one-shot, end-to-end coding agents](https://stripe.dev/blog/minions-stripes-one-shot-end-to-end-coding-agents): Agents carrying out work, running tests, and preparing pull requests for subsequent human review.
+- [Stripe — Meet Stripe’s Knowledge AI Platform](https://stripe.dev/blog/meet-stripes-knowledge-ai-platform): Different definitions of completion across knowledge tasks and collaboration work still ahead at the time of publication.
