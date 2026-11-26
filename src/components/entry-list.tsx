@@ -15,6 +15,10 @@ export type EntryListItem = {
 /**
  * The single list primitive used by Writing, Projects, Gatherings and Home.
  * One rhythm across the whole archive, in both languages.
+ *
+ * The whole item is the click target: readers click the description as often
+ * as the title. The title link stays the only link (one accessible name, no
+ * nested anchors); its ::after pseudo-element is stretched over the item.
  */
 export function EntryList({
   items,
@@ -37,13 +41,13 @@ export function EntryList({
   return (
     <ul className="divide-y divide-rule border-t border-rule">
       {items.map((item) => (
-        <li key={item.href} className="group py-6 sm:py-7">
+        <li key={item.href} className="group relative py-6 sm:py-7">
           <article>
             <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
               <Heading className="font-serif text-[1.15rem] leading-snug">
                 <Link
                   href={item.href}
-                  className="underline decoration-transparent decoration-1 underline-offset-[0.22em] transition-[text-decoration-color] group-hover:decoration-accent"
+                  className="underline decoration-transparent decoration-1 underline-offset-[0.22em] transition-[text-decoration-color] group-hover:decoration-accent after:absolute after:inset-0"
                 >
                   {item.title}
                 </Link>

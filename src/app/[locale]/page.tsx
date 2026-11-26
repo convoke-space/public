@@ -34,8 +34,10 @@ export default async function HomePage({ params }: { params: Promise<Params> }) 
   if (!isLocale(locale)) notFound();
 
   const dict = getDictionary(locale);
-  const posts = getPosts(locale).slice(0, 5);
-  const projects = getProjects(locale).slice(0, 4);
+  const allPosts = getPosts(locale);
+  const allProjects = getProjects(locale);
+  const posts = allPosts.slice(0, 5);
+  const projects = allProjects.slice(0, 4);
   const { upcoming } = splitEvents(locale);
   const nextGathering = upcoming[0];
 
@@ -90,6 +92,7 @@ export default async function HomePage({ params }: { params: Promise<Params> }) 
             title={dict.nav.writing}
             href={localePath(locale, "/writing")}
             linkLabel={dict.home.allWriting}
+            hasMore={allPosts.length > posts.length}
           >
             <EntryList
               locale={locale}
@@ -110,6 +113,7 @@ export default async function HomePage({ params }: { params: Promise<Params> }) 
             title={dict.nav.projects}
             href={localePath(locale, "/projects")}
             linkLabel={dict.home.allProjects}
+            hasMore={allProjects.length > projects.length}
           >
             <EntryList
               locale={locale}
@@ -134,12 +138,15 @@ function Section({
   title,
   href,
   linkLabel,
+  hasMore,
   children,
 }: {
   id: string;
   title: string;
   href: string;
   linkLabel: string;
+  /** The list is cut short, so repeat the link where the reader runs out. */
+  hasMore: boolean;
   children: React.ReactNode;
 }) {
   return (
@@ -153,6 +160,13 @@ function Section({
         </Link>
       </div>
       {children}
+      {hasMore ? (
+        <p className="mt-5 text-right">
+          <Link href={href} className="link-underline text-[0.9rem] text-muted">
+            {linkLabel} →
+          </Link>
+        </p>
+      ) : null}
     </section>
   );
 }
